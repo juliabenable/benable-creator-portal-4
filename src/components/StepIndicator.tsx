@@ -50,7 +50,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
       </div>
 
       {/* Step circles */}
-      <div className="flex items-center justify-between w-full">
+      <div className="flex items-center justify-between w-full overflow-hidden">
         {CAMPAIGN_STEPS.map((step, i) => {
           const isCompleted = i < activeIndex;
           const isActive = i === activeIndex;
@@ -61,7 +61,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
                 <div className="relative">
                   <div
                     className={cn(
-                      'w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-500 shrink-0',
+                      'w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-500 shrink-0',
                       isCompleted && 'bg-primary text-primary-foreground',
                       isActive && 'bg-primary text-primary-foreground shadow-md shadow-primary/30',
                       !isCompleted && !isActive && 'bg-muted text-muted-foreground'
@@ -76,7 +76,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
                 </div>
                 <span
                   className={cn(
-                    'text-[10px] font-medium text-center leading-tight whitespace-nowrap',
+                    'text-[9px] font-medium text-center leading-tight whitespace-nowrap',
                     isActive ? 'text-primary font-semibold' : isCompleted ? 'text-foreground' : 'text-muted-foreground'
                   )}
                 >
@@ -85,7 +85,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
               </div>
               {/* Connector line */}
               {i < CAMPAIGN_STEPS.length - 1 && (
-                <div className="flex-1 mx-1.5 mt-[-14px]">
+                <div className="flex-1 mx-1 mt-[-14px]">
                   <div className="h-0.5 bg-muted rounded-full overflow-hidden">
                     <div
                       className={cn(

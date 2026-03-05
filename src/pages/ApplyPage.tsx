@@ -135,7 +135,7 @@ export default function ApplyPage() {
   const currentStepIndex = step - 1; // step 0 is welcome, so step 1 = index 0
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6">
+    <div className="max-w-lg mx-auto px-4 py-6 pb-24">
       {/* Improved Step Progress Indicator */}
       {step > 0 && (
         <div className="mb-6">
@@ -444,14 +444,6 @@ function SocialStatsStep() {
                   <Label>Avg. Views</Label>
                   <Input type="number" placeholder="e.g. 5000" />
                 </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 p-2.5 bg-blue-50 rounded-lg">
-                <Info className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-blue-700">
-                  Average views per video is a key metric for TikTok — brands care about this even
-                  more than follower count.
-                </p>
               </div>
 
               {/* Demographics */}
