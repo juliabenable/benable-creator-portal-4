@@ -94,6 +94,8 @@ export interface Campaign {
   briefSummary: string[];
   // Platforms required for this campaign
   requiredPlatforms: string[];
+  // Admin override: force publish window open for demo
+  publishWindowOpen?: boolean;
 }
 
 export const CAMPAIGN_STEPS: { key: CampaignStep; label: string }[] = [

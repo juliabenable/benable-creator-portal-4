@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Settings2, Bell } from 'lucide-react';
+import { Settings2, Bell, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useCreator } from '@/context/CreatorContext';
 import { ALL_STEPS_ORDERED, type CampaignStep, type CreatorStatus } from '@/types';
 
@@ -27,7 +27,7 @@ const STEP_LABELS: Record<CampaignStep, string> = {
 };
 
 export function DemoControls() {
-  const { creatorStatus, setCreatorStatus, campaigns, setCampaignStep, advanceCampaignStep, addNotification, resetAll } =
+  const { creatorStatus, setCreatorStatus, campaigns, setCampaignStep, advanceCampaignStep, updateCampaignField, addNotification, resetAll } =
     useCreator();
 
   return (
@@ -88,14 +88,37 @@ export function DemoControls() {
                 ))}
               </div>
 
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => advanceCampaignStep(campaign.id)}
-                disabled={campaign.currentStep === 'completed'}
-              >
-                Advance to Next Step
-              </Button>
+              <div className="flex items-center gap-2 mb-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => advanceCampaignStep(campaign.id)}
+                  disabled={campaign.currentStep === 'completed'}
+                >
+                  Advance to Next Step
+                </Button>
+              </div>
+
+              {/* Publish Window Toggle */}
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant={campaign.publishWindowOpen ? 'default' : 'outline'}
+                  className="gap-1.5 text-xs h-7"
+                  onClick={() => {
+                    updateCampaignField(campaign.id, {
+                      publishWindowOpen: !campaign.publishWindowOpen,
+                    });
+                  }}
+                >
+                  {campaign.publishWindowOpen ? (
+                    <ToggleRight className="w-3.5 h-3.5" />
+                  ) : (
+                    <ToggleLeft className="w-3.5 h-3.5" />
+                  )}
+                  Publish Window {campaign.publishWindowOpen ? 'Open' : 'Closed'}
+                </Button>
+              </div>
             </div>
           ))}
 

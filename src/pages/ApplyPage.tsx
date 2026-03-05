@@ -223,30 +223,30 @@ export default function ApplyPage() {
 /* ─── Step 0: VIP Welcome ─── */
 function WelcomeStep() {
   return (
-    <div className="text-center space-y-5 py-8">
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10">
-        <Sparkles className="w-8 h-8 text-primary" />
+    <div className="text-center space-y-3 py-2">
+      <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10">
+        <Sparkles className="w-6 h-6 text-primary" />
       </div>
       <div>
-        <Badge variant="secondary" className="text-xs mb-3 gap-1">
+        <Badge variant="secondary" className="text-xs mb-1.5 gap-1">
           <Crown className="w-3 h-3" />
           By Invitation Only
         </Badge>
-        <h1 className="text-2xl font-bold tracking-tight">You've Been Invited</h1>
-        <p className="text-muted-foreground mt-2 text-sm max-w-xs mx-auto">
-          You're being invited to join a select group of creators who will get
-          priority access to brand campaigns as part of Benable's first creator program.
+        <h1 className="text-xl font-bold tracking-tight">You've Been Invited</h1>
+        <p className="text-muted-foreground mt-1 text-sm max-w-xs mx-auto">
+          Join a select group of creators with priority access to brand campaigns
+          as part of Benable's first creator program.
         </p>
       </div>
-      <div className="text-left max-w-xs mx-auto space-y-3 pt-2">
+      <div className="text-left max-w-xs mx-auto space-y-2">
         {[
           { icon: Crown, text: 'Priority access to paid brand campaigns' },
           { icon: Globe, text: 'Work with top beauty, lifestyle & wellness brands' },
           { icon: Sparkles, text: 'Free products or gift cards + compensation for every campaign' },
         ].map((item, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <item.icon className="w-4 h-4 text-primary" />
+          <div key={i} className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <item.icon className="w-3.5 h-3.5 text-primary" />
             </div>
             <p className="text-sm">{item.text}</p>
           </div>
@@ -412,7 +412,7 @@ function ShippingStep() {
 
 /* ─── Step 3: Social Stats (Accordion Drawers) ─── */
 function SocialStatsStep() {
-  const [tiktokOpen, setTiktokOpen] = useState(true);
+  const [tiktokOpen, setTiktokOpen] = useState(false);
   const [igOpen, setIgOpen] = useState(false);
 
   return (
@@ -574,7 +574,7 @@ function AudienceDemographics({ platform: _platform }: { platform: string }) {
   );
 }
 
-/* ─── Step 4: Past Posts (3+, link or image upload) ─── */
+/* ─── Step 4: Past Posts (3+, link or image upload) — flat list, no double cards ─── */
 function PastPostsStep({
   posts,
   addPost,
@@ -586,99 +586,95 @@ function PastPostsStep({
   removePost: (id: string) => void;
   updatePost: (id: string, field: keyof PostEntry, value: string) => void;
 }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <LinkIcon className="w-4 h-4 text-primary" />
-          Past Posts
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-start gap-2.5 p-3 bg-primary/5 rounded-lg">
-          <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-          <p className="text-xs text-muted-foreground">
-            Share 3+ of your best posts so we can see your content style. Try to include
-            a mix of formats — TikTok videos, Instagram Reels, carousels — to show range and
-            diversity. We'll automatically pull engagement stats from each link.
-          </p>
-        </div>
-        {posts.map((post, idx) => (
-          <div key={post.id} className="border rounded-lg p-3 space-y-3">
-            <div className="flex items-center justify-between">
-              <Badge variant="secondary" className="text-xs">Post {idx + 1}</Badge>
-              {posts.length > 1 && (
-                <button type="button" onClick={() => removePost(post.id)} className="text-muted-foreground hover:text-destructive transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Platform</Label>
-              <Select value={post.platform} onValueChange={(v) => updatePost(post.id, 'platform', v)}>
-                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tiktok">TikTok</SelectItem>
-                  <SelectItem value="instagram_reel">Instagram Reel</SelectItem>
-                  <SelectItem value="instagram_carousel">Instagram Carousel</SelectItem>
-                  <SelectItem value="instagram_story">Instagram Story</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+  const platformLabels: Record<string, string> = {
+    tiktok: 'TikTok',
+    instagram_reel: 'IG Reel',
+    instagram_carousel: 'IG Carousel',
+    instagram_story: 'IG Story',
+  };
 
-            {/* Link or Image Upload toggle */}
-            <div className="space-y-1.5">
-              <Label className="text-xs">Content *</Label>
-              <div className="flex gap-2 mb-2">
-                <button
-                  type="button"
-                  onClick={() => updatePost(post.id, 'type', 'link')}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md border text-xs font-medium transition-colors ${
-                    post.type === 'link' ? 'border-primary bg-primary/5 text-primary' : 'border-border text-muted-foreground hover:border-primary/30'
-                  }`}
-                >
-                  <LinkIcon className="w-3.5 h-3.5" />
-                  Paste Link
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updatePost(post.id, 'type', 'image')}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md border text-xs font-medium transition-colors ${
-                    post.type === 'image' ? 'border-primary bg-primary/5 text-primary' : 'border-border text-muted-foreground hover:border-primary/30'
-                  }`}
-                >
-                  <Image className="w-3.5 h-3.5" />
-                  Upload Image
-                </button>
-              </div>
-              {post.type === 'link' ? (
-                <Input
-                  placeholder="https://www.tiktok.com/... or https://www.instagram.com/..."
-                  value={post.link}
-                  onChange={(e) => updatePost(post.id, 'link', e.target.value)}
-                  className="h-9"
-                />
-              ) : (
-                <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors">
-                  <Image className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground font-medium">
-                    Click to upload a screenshot
-                  </p>
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    PNG, JPG up to 10MB
-                  </p>
-                </div>
-              )}
-            </div>
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <LinkIcon className="w-4 h-4 text-primary" />
+        <h2 className="text-base font-semibold">Past Posts</h2>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Share 3+ of your best posts. Include a mix of formats to show range.
+        We'll pull engagement stats from each link.
+      </p>
+
+      {posts.map((post, idx) => (
+        <div key={post.id} className="space-y-2">
+          {/* Row: number label + platform select + remove */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground w-5 shrink-0">{idx + 1}.</span>
+            <Select value={post.platform} onValueChange={(v) => updatePost(post.id, 'platform', v)}>
+              <SelectTrigger className="h-8 w-28 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tiktok">TikTok</SelectItem>
+                <SelectItem value="instagram_reel">IG Reel</SelectItem>
+                <SelectItem value="instagram_carousel">IG Carousel</SelectItem>
+                <SelectItem value="instagram_story">IG Story</SelectItem>
+              </SelectContent>
+            </Select>
+            <Badge variant="secondary" className="text-[10px] px-1.5">
+              {platformLabels[post.platform] || post.platform}
+            </Badge>
+            <div className="flex-1" />
+            {posts.length > 1 && (
+              <button type="button" onClick={() => removePost(post.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
-        ))}
-        {posts.length < 8 && (
-          <Button type="button" variant="outline" size="sm" className="w-full" onClick={addPost}>
-            <Plus className="w-4 h-4 mr-1" />
-            Add Another Post
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+
+          {/* Content input — link or image */}
+          {post.type === 'link' ? (
+            <div className="flex items-center gap-2 ml-7">
+              <Input
+                placeholder="Paste link..."
+                value={post.link}
+                onChange={(e) => updatePost(post.id, 'link', e.target.value)}
+                className="h-8 text-sm flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => updatePost(post.id, 'type', 'image')}
+                className="text-[10px] text-primary hover:underline whitespace-nowrap shrink-0"
+              >
+                Upload instead
+              </button>
+            </div>
+          ) : (
+            <div className="ml-7 flex items-center gap-2">
+              <div className="flex-1 border-2 border-dashed rounded-lg px-3 py-2 text-center cursor-pointer hover:bg-muted/50 transition-colors">
+                <div className="flex items-center justify-center gap-2">
+                  <Image className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Click to upload screenshot</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => updatePost(post.id, 'type', 'link')}
+                className="text-[10px] text-primary hover:underline whitespace-nowrap shrink-0"
+              >
+                Paste link
+              </button>
+            </div>
+          )}
+
+          {/* Divider between posts */}
+          {idx < posts.length - 1 && <div className="border-b ml-7" />}
+        </div>
+      ))}
+
+      {posts.length < 8 && (
+        <Button type="button" variant="outline" size="sm" className="w-full mt-2" onClick={addPost}>
+          <Plus className="w-4 h-4 mr-1" />
+          Add Another Post
+        </Button>
+      )}
+    </div>
   );
 }

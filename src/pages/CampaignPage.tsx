@@ -560,24 +560,25 @@ function ProductPhaseStep({ campaign }: StepProps) {
                 <p className="text-muted-foreground">United States</p>
               </div>
               {!addressConfirmed ? (
-                <div className="flex gap-2">
+                <div className="space-y-2">
                   <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => setEditingAddress(true)}
-                  >
-                    <Edit3 className="w-4 h-4 mr-2" />
-                    Modify
-                  </Button>
-                  <Button
-                    className="flex-1"
+                    className="w-full h-11 text-base font-semibold"
                     onClick={() => {
                       setAddressConfirmed(true);
                       toast.success('Address confirmed!');
                     }}
                   >
-                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                    Confirm
+                    <CheckCircle2 className="w-5 h-5 mr-2" />
+                    Confirm Address
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-muted-foreground"
+                    onClick={() => setEditingAddress(true)}
+                  >
+                    <Edit3 className="w-3.5 h-3.5 mr-1.5" />
+                    Need to update your address?
                   </Button>
                 </div>
               ) : (
@@ -679,20 +680,58 @@ function ProductPhaseStep({ campaign }: StepProps) {
       </Card>
 
       <StickyCTA>
-        <Button
-          className="w-full h-12 text-base font-semibold"
-          onClick={() => {
-            if (confirmationNumber) {
+        {confirmationNumber.trim() ? (
+          <Button
+            className="w-full h-12 text-base font-semibold"
+            onClick={() => {
               updateCampaignField(campaign.id, { orderConfirmationNumber: confirmationNumber });
-            }
-            window.scrollTo(0, 0);
-            setCampaignStep(campaign.id, 'order_placed');
-            toast.success('Order marked as placed!');
-          }}
-        >
-          <Package className="w-5 h-5 mr-2" />
-          I've Placed My Order
-        </Button>
+              window.scrollTo(0, 0);
+              setCampaignStep(campaign.id, 'order_placed');
+              toast.success('Order marked as placed!');
+            }}
+          >
+            <Package className="w-5 h-5 mr-2" />
+            I've Placed My Order
+          </Button>
+        ) : (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button className="w-full h-12 text-base font-semibold">
+                <Package className="w-5 h-5 mr-2" />
+                I've Placed My Order
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Missing Confirmation Number</AlertDialogTitle>
+                <AlertDialogDescription>
+                  You haven't entered an order confirmation number. Adding it helps us track your
+                  order. Would you like to go back and add it?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction
+                  onClick={() => {
+                    // Focus the confirmation input
+                    const input = document.querySelector('input[placeholder*="ORD"]') as HTMLInputElement;
+                    if (input) input.focus();
+                  }}
+                >
+                  Add Confirmation #
+                </AlertDialogAction>
+                <AlertDialogCancel
+                  onClick={() => {
+                    window.scrollTo(0, 0);
+                    setCampaignStep(campaign.id, 'order_placed');
+                    toast.success('Order marked as placed!');
+                  }}
+                >
+                  Skip for Now
+                </AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </StickyCTA>
 
       <UpcomingSteps
@@ -873,7 +912,7 @@ function CampaignBriefCollapsible({ campaign }: StepProps) {
   );
 }
 
-/* ─── Step: Content Upload (Dynamic links + AI pre-check PER ITEM) ─── */
+/* ─── Step: Content Upload (Flat layout + inline compliance per deliverable) ─── */
 function ContentUploadStep({ campaign }: StepProps) {
   const { setCampaignStep, updateCampaignField } = useCreator();
   const [links, setLinks] = useState<(ContentLinkEntry & { imageMode?: boolean })[]>(
@@ -887,7 +926,7 @@ function ContentUploadStep({ campaign }: StepProps) {
   );
   const [checking, setChecking] = useState(false);
   const [preCheckResults, setPreCheckResults] = useState<
-    { platform: string; checks: { label: string; ok: boolean }[] }[] | null
+    Record<string, { label: string; ok: boolean }[]> | null
   >(null);
 
   function addLink() {
@@ -913,17 +952,15 @@ function ContentUploadStep({ campaign }: StepProps) {
     setChecking(true);
     setPreCheckResults(null);
     setTimeout(() => {
-      const results = links.map((link) => {
+      const results: Record<string, { label: string; ok: boolean }[]> = {};
+      links.forEach((link) => {
         const hasContent = link.url.trim() || link.imageMode;
         const isBenable = link.platform.includes('Benable');
-        return {
-          platform: link.platform,
-          checks: [
-            { label: `Brand tag @28Litsea in caption`, ok: !isBenable },
-            { label: `Required hashtags included`, ok: isBenable ? true : Math.random() > 0.3 },
-            { label: 'Content provided', ok: !!hasContent },
-          ],
-        };
+        results[link.id] = [
+          { label: `Brand tag @${campaign.brandName.replace(/\s/g, '')} in caption`, ok: !isBenable },
+          { label: `Required hashtags included`, ok: isBenable ? true : Math.random() > 0.3 },
+          { label: 'Content provided', ok: !!hasContent },
+        ];
       });
       setPreCheckResults(results);
       setChecking(false);
@@ -937,7 +974,9 @@ function ContentUploadStep({ campaign }: StepProps) {
     toast.success('Content submitted for review!');
   }
 
-  const allPassed = preCheckResults?.every((r) => r.checks.every((c) => c.ok));
+  const allPassed = preCheckResults
+    ? Object.values(preCheckResults).every((checks) => checks.every((c) => c.ok))
+    : false;
 
   return (
     <div className="space-y-4">
@@ -970,139 +1009,105 @@ function ContentUploadStep({ campaign }: StepProps) {
       {/* Collapsible brief for reference */}
       <CampaignBriefCollapsible campaign={campaign} />
 
-      {/* Dynamic Content Links */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Submit Your Content</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Share links to your draft content or upload images. Each deliverable will be
-            checked for compliance individually.
-          </p>
+      {/* Submit Your Content heading */}
+      <div className="px-1">
+        <h3 className="text-base font-semibold">Submit Your Content</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          Share links to your draft content or upload images.
+        </p>
+      </div>
 
-          {links.map((link, idx) => (
-            <div key={link.id} className="border rounded-lg p-3 space-y-2">
+      {/* Flat deliverable list — each deliverable is its own card with inline compliance */}
+      {links.map((link, idx) => {
+        const checks = preCheckResults?.[link.id];
+        const hasIssues = checks?.some((c) => !c.ok);
+
+        return (
+          <Card key={link.id} className={checks ? (hasIssues ? 'border-amber-200' : 'border-primary/30') : ''}>
+            <CardContent className="py-3 space-y-2.5">
+              {/* Header row */}
               <div className="flex items-center justify-between">
-                <Badge variant="secondary" className="text-xs">Deliverable {idx + 1}</Badge>
-                {links.length > 1 && (
-                  <button onClick={() => removeLink(link.id)} className="text-muted-foreground hover:text-destructive transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-              <div className="grid grid-cols-5 gap-2">
-                <div className="col-span-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-muted-foreground">{idx + 1}.</span>
                   <Select value={link.platform} onValueChange={(v) => updateLink(link.id, 'platform', v)}>
-                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {CONTENT_PLATFORMS.map((p) => (
                         <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-                <div className="col-span-3">
-                  {link.imageMode ? (
-                    <div className="flex items-center gap-2 h-9 px-3 border rounded-md bg-muted/50 text-sm text-muted-foreground cursor-pointer">
-                      <Image className="w-4 h-4" />
-                      <span>Upload image</span>
-                    </div>
-                  ) : (
-                    <Input
-                      placeholder="Paste link..."
-                      value={link.url}
-                      onChange={(e) => updateLink(link.id, 'url', e.target.value)}
-                      className="h-9"
-                    />
+                  {checks && (
+                    hasIssues
+                      ? <Badge className="bg-amber-100 text-amber-700 text-[10px] border-0">Needs Attention</Badge>
+                      : <Badge className="bg-primary/10 text-primary text-[10px] border-0">Pass</Badge>
                   )}
                 </div>
+                {links.length > 1 && (
+                  <button onClick={() => removeLink(link.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
-              {/* Toggle link/image */}
+
+              {/* Content input — stacked, not side by side */}
+              {link.imageMode ? (
+                <div className="flex items-center gap-2 h-9 px-3 border rounded-md bg-muted/50 text-sm text-muted-foreground cursor-pointer">
+                  <Image className="w-4 h-4" />
+                  <span>Upload image</span>
+                </div>
+              ) : (
+                <Input
+                  placeholder={`Paste ${link.platform} link...`}
+                  value={link.url}
+                  onChange={(e) => updateLink(link.id, 'url', e.target.value)}
+                  className="h-9"
+                />
+              )}
               <button
                 onClick={() => updateLink(link.id, 'imageMode', !link.imageMode)}
                 className="text-[11px] text-primary hover:underline"
               >
                 {link.imageMode ? 'Switch to link' : 'Upload an image instead'}
               </button>
-              {link.url && !link.imageMode && (
-                <ContentLinkPreview platform={link.platform} url={link.url} />
-              )}
-            </div>
-          ))}
 
-          <Button type="button" variant="outline" size="sm" className="w-full" onClick={addLink}>
-            <Plus className="w-4 h-4 mr-1" />
-            Add Another Deliverable
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* AI Pre-Check — per content item (grouped Collapsible drawers) */}
-      {preCheckResults && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="w-4 h-4 text-blue-600" />
-            <span className="text-base font-semibold">Compliance Check</span>
-          </div>
-          {preCheckResults.map((result, ri) => {
-            const allOk = result.checks.every((c) => c.ok);
-            return (
-              <Collapsible key={ri} defaultOpen={!allOk}>
-                <Card className={allOk ? 'border-primary/20' : 'border-amber-200'}>
-                  <CollapsibleTrigger asChild>
-                    <button className="w-full flex items-center justify-between px-5 py-3 text-sm font-medium hover:bg-muted/50 transition-colors rounded-xl">
-                      <span className="flex items-center gap-2">
-                        {allOk ? (
-                          <CheckCircle2 className="w-4 h-4 text-primary" />
-                        ) : (
-                          <AlertCircle className="w-4 h-4 text-amber-500" />
-                        )}
-                        {result.platform}
-                        {allOk ? (
-                          <Badge className="bg-primary/10 text-primary text-[10px] border-0">Pass</Badge>
-                        ) : (
-                          <Badge className="bg-amber-100 text-amber-700 text-[10px] border-0">Needs Attention</Badge>
-                        )}
+              {/* Inline compliance check results for THIS deliverable */}
+              {checks && (
+                <div className="space-y-1.5 pt-1 border-t">
+                  {checks.map((check, ci) => (
+                    <div
+                      key={ci}
+                      className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs ${
+                        check.ok ? 'bg-primary/5' : 'bg-amber-50'
+                      }`}
+                    >
+                      {check.ok ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                      ) : (
+                        <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                      )}
+                      <span className={check.ok ? 'text-muted-foreground' : 'text-red-600 font-medium'}>
+                        {check.label}
                       </span>
-                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <CardContent className="space-y-2 pt-0">
-                      {result.checks.map((check, ci) => (
-                        <div
-                          key={ci}
-                          className={`flex items-start gap-3 p-3 rounded-lg ${
-                            check.ok ? 'bg-primary/5' : 'bg-amber-50'
-                          }`}
-                        >
-                          <div className="shrink-0 mt-0.5">
-                            {check.ok ? (
-                              <CheckCircle2 className="w-4 h-4 text-primary" />
-                            ) : (
-                              <XCircle className="w-4 h-4 text-red-500" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <p className={`text-sm ${check.ok ? 'text-muted-foreground' : 'text-red-600 font-medium'}`}>
-                              {check.label}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
-            );
-          })}
-          {!allPassed && (
-            <p className="text-xs text-red-600 font-medium px-1">
-              Some items need attention. Please fix them before submitting.
-            </p>
-          )}
-        </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
+
+      <Button type="button" variant="outline" size="sm" className="w-full" onClick={addLink}>
+        <Plus className="w-4 h-4 mr-1" />
+        Add Another Deliverable
+      </Button>
+
+      {/* Error message if compliance has issues */}
+      {preCheckResults && !allPassed && (
+        <p className="text-xs text-red-600 font-medium px-1">
+          Some items need attention. Please fix them before submitting.
+        </p>
       )}
 
       <StickyCTA>
@@ -1360,7 +1365,7 @@ function ComplianceFeedbackStep({ campaign }: StepProps) {
   );
 }
 
-/* ─── Step: Content Approved + Publish (Window Logic + Live Links) ─── */
+/* ─── Step: Content Approved + Publish (Window Logic + Live Links + "I've Published") ─── */
 function ContentApprovedStep({ campaign }: StepProps) {
   const { setCampaignStep, updateCampaignField } = useCreator();
   const [links, setLinks] = useState<ContentLinkEntry[]>(
@@ -1371,13 +1376,15 @@ function ContentApprovedStep({ campaign }: StepProps) {
       url: '',
     }))
   );
+  const [showMissingLinksPrompt, setShowMissingLinksPrompt] = useState(false);
 
-  // Determine publish window status
+  // Determine publish window status — respect admin override
   const now = new Date();
   const windowStart = new Date(campaign.publishWindowStart);
   const windowEnd = new Date(campaign.publishWindowEnd);
-  const isPreWindow = now < windowStart;
-  const isInWindow = now >= windowStart && now <= windowEnd;
+  const adminOverride = campaign.publishWindowOpen;
+  const isPreWindow = adminOverride ? false : now < windowStart;
+  const isInWindow = adminOverride ? true : (now >= windowStart && now <= windowEnd);
 
   // All links must have URLs before completing
   const allLinksFilled = links.every((l) => l.url.trim() !== '');
@@ -1385,6 +1392,18 @@ function ContentApprovedStep({ campaign }: StepProps) {
 
   function updateLink(id: string, field: keyof ContentLinkEntry, value: string) {
     setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
+  }
+
+  function handlePublishClick() {
+    if (!allLinksFilled) {
+      setShowMissingLinksPrompt(true);
+      return;
+    }
+    // All links filled — complete
+    updateCampaignField(campaign.id, { publishedLinks: links.filter((l) => l.url) });
+    window.scrollTo(0, 0);
+    setCampaignStep(campaign.id, 'completed');
+    toast.success('Campaign completed! Thank you!');
   }
 
   return (
@@ -1429,23 +1448,21 @@ function ContentApprovedStep({ campaign }: StepProps) {
 
       {/* Live Public Links Input — shown during/after window */}
       {!isPreWindow && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Submit Your Live Links</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Paste the public link for each piece of content you've published. All links are required
-              to complete the campaign.
+        <>
+          <div className="px-1">
+            <h3 className="text-base font-semibold">Your Live Links</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Paste the public link for each piece of published content. All links are required.
             </p>
+          </div>
 
-            {links.map((link) => (
-              <div key={link.id} className="border rounded-lg p-3 space-y-2">
+          {links.map((link) => (
+            <Card key={link.id}>
+              <CardContent className="py-3 space-y-2">
                 <div className="flex items-center gap-2">
-                  <ContentLinkPreview platform={link.platform} url="" />
                   <span className="text-sm font-medium">{link.platform}</span>
                   {link.url.trim() ? (
-                    <Badge className="bg-primary text-white text-[10px] px-1.5 py-0 border-0 ml-auto">✓</Badge>
+                    <Badge className="bg-primary text-white text-[10px] px-1.5 py-0 border-0 ml-auto">✓ Submitted</Badge>
                   ) : (
                     <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-auto text-muted-foreground">Required</Badge>
                   )}
@@ -1459,61 +1476,51 @@ function ContentApprovedStep({ campaign }: StepProps) {
                 {link.url && (
                   <ContentLinkPreview platform={link.platform} url={link.url} />
                 )}
-              </div>
-            ))}
+              </CardContent>
+            </Card>
+          ))}
 
-            {/* Progress indicator */}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <div className="flex-1 bg-muted rounded-full h-1.5">
-                <div
-                  className="bg-primary h-full rounded-full transition-all duration-300"
-                  style={{ width: `${(filledCount / links.length) * 100}%` }}
-                />
-              </div>
-              <span>{filledCount}/{links.length} links submitted</span>
+          {/* Progress indicator */}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
+            <div className="flex-1 bg-muted rounded-full h-1.5">
+              <div
+                className="bg-primary h-full rounded-full transition-all duration-300"
+                style={{ width: `${(filledCount / links.length) * 100}%` }}
+              />
             </div>
-          </CardContent>
-        </Card>
+            <span>{filledCount}/{links.length} links submitted</span>
+          </div>
+        </>
       )}
 
-      {/* Confirm & Complete — requires all links */}
+      {/* "I've Published My Content" button — requires all links, prompts if missing */}
       {!isPreWindow && (
         <StickyCTA>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                className="w-full h-12 text-base font-semibold"
-                disabled={!allLinksFilled}
-              >
-                <CheckCircle2 className="w-5 h-5 mr-2" />
-                {allLinksFilled ? 'Confirm & Complete Campaign' : `Submit all ${links.length} links to continue`}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Complete Campaign</AlertDialogTitle>
-                <AlertDialogDescription>
-                  By confirming, you verify that your content has been published and the {links.length} links
-                  provided are the live public posts. This will mark the campaign as complete.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    updateCampaignField(campaign.id, { publishedLinks: links.filter((l) => l.url) });
-                    window.scrollTo(0, 0);
-                    setCampaignStep(campaign.id, 'completed');
-                    toast.success('Campaign completed! Thank you!');
-                  }}
-                >
-                  Confirm & Complete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button
+            className="w-full h-12 text-base font-semibold"
+            onClick={handlePublishClick}
+          >
+            <Rocket className="w-5 h-5 mr-2" />
+            I've Published My Content
+          </Button>
         </StickyCTA>
       )}
+
+      {/* AlertDialog for missing links — controlled */}
+      <AlertDialog open={showMissingLinksPrompt} onOpenChange={setShowMissingLinksPrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Missing Live Links</AlertDialogTitle>
+            <AlertDialogDescription>
+              You still need to add {links.length - filledCount} live link{links.length - filledCount > 1 ? 's' : ''} before
+              completing the campaign. Please paste the public URL for each piece of published content.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Go Back & Add Links</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
