@@ -1,19 +1,68 @@
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Home, ClipboardList, User } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { User, Menu } from 'lucide-react';
 import { DemoControls } from '@/components/DemoControls';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { Toaster } from '@/components/ui/sonner';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-const NAV_ITEMS = [
-  { path: '/', icon: Home, label: 'Home' },
-  { path: '/campaigns', icon: ClipboardList, label: 'Campaigns' },
-  { path: '/profile', icon: User, label: 'Profile' },
-];
+function HeaderMenu() {
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
+  const menuContent = (onClose?: () => void) => (
+    <div className="space-y-1 py-1">
+      <NotificationCenter inline />
+      <Separator className="my-1" />
+      <button
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-muted transition-colors text-left"
+        onClick={() => {
+          navigate('/profile');
+          onClose?.();
+        }}
+      >
+        <User className="w-4 h-4" />
+        My Profile
+      </button>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet>
+        <SheetTrigger asChild>
+          <button className="relative p-2 rounded-lg hover:bg-muted transition-colors">
+            <Menu className="w-5 h-5" />
+          </button>
+        </SheetTrigger>
+        <SheetContent side="right" className="w-72">
+          <SheetHeader>
+            <SheetTitle className="text-left">Menu</SheetTitle>
+          </SheetHeader>
+          {menuContent()}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className="relative p-2 rounded-lg hover:bg-muted transition-colors">
+          <Menu className="w-5 h-5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-72 p-2">
+        {menuContent()}
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export default function Layout() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -25,38 +74,13 @@ export default function Layout() {
           </div>
           <span className="font-semibold text-lg tracking-tight">benable</span>
         </button>
-        <NotificationCenter />
+        <HeaderMenu />
       </header>
 
       {/* Page Content */}
-      <main className="flex-1 pb-20 md:pb-6">
+      <main className="flex-1 pb-6">
         <Outlet />
       </main>
-
-      {/* Bottom Navigation (mobile) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-card border-t md:hidden">
-        <div className="flex items-center justify-around py-2">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              item.path === '/'
-                ? location.pathname === '/'
-                : location.pathname.startsWith(item.path);
-            return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={cn(
-                  'flex flex-col items-center gap-0.5 px-4 py-1 rounded-lg transition-colors',
-                  isActive ? 'text-primary' : 'text-muted-foreground'
-                )}
-              >
-                <item.icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
 
       <DemoControls />
       <Toaster position="top-center" />

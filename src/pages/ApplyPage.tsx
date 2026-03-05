@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -93,6 +93,11 @@ export default function ApplyPage() {
     { id: '3', platform: 'instagram_carousel', type: 'link', link: '' },
   ]);
 
+  // Scroll to top whenever step changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
+
   if (creatorStatus !== 'not_applied') {
     return <Navigate to="/" replace />;
   }
@@ -135,7 +140,7 @@ export default function ApplyPage() {
   const currentStepIndex = step - 1; // step 0 is welcome, so step 1 = index 0
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6 pb-24">
+    <div className="max-w-lg mx-auto px-4 py-6 pb-8">
       {/* Improved Step Progress Indicator */}
       {step > 0 && (
         <div className="mb-6">
@@ -223,30 +228,30 @@ export default function ApplyPage() {
 /* ─── Step 0: VIP Welcome ─── */
 function WelcomeStep() {
   return (
-    <div className="text-center space-y-3 py-2">
-      <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10">
-        <Sparkles className="w-6 h-6 text-primary" />
+    <div className="text-center space-y-4 py-4">
+      <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10">
+        <Sparkles className="w-7 h-7 text-primary" />
       </div>
       <div>
-        <Badge variant="secondary" className="text-xs mb-1.5 gap-1">
+        <Badge variant="secondary" className="text-xs mb-2 gap-1">
           <Crown className="w-3 h-3" />
           By Invitation Only
         </Badge>
-        <h1 className="text-xl font-bold tracking-tight">You've Been Invited</h1>
-        <p className="text-muted-foreground mt-1 text-sm max-w-xs mx-auto">
+        <h1 className="text-2xl font-bold tracking-tight">You've Been Invited</h1>
+        <p className="text-muted-foreground mt-1.5 text-sm max-w-xs mx-auto">
           Join a select group of creators with priority access to brand campaigns
           as part of Benable's first creator program.
         </p>
       </div>
-      <div className="text-left max-w-xs mx-auto space-y-2">
+      <div className="text-left max-w-xs mx-auto space-y-3">
         {[
           { icon: Crown, text: 'Priority access to paid brand campaigns' },
           { icon: Globe, text: 'Work with top beauty, lifestyle & wellness brands' },
           { icon: Sparkles, text: 'Free products or gift cards + compensation for every campaign' },
         ].map((item, i) => (
-          <div key={i} className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <item.icon className="w-3.5 h-3.5 text-primary" />
+          <div key={i} className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <item.icon className="w-4 h-4 text-primary" />
             </div>
             <p className="text-sm">{item.text}</p>
           </div>

@@ -1,11 +1,10 @@
-import { Bell } from 'lucide-react';
+import { useState } from 'react';
+import { Bell, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { useCreator } from '@/context/CreatorContext';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -23,10 +22,10 @@ function NotificationList({ onSelect }: { onSelect?: () => void }) {
           </Button>
         )}
       </div>
-      <ScrollArea className="max-h-80">
+      <ScrollArea className="max-h-60">
         <div className="space-y-0.5 px-1">
           {notifications.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No notifications</p>
+            <p className="text-sm text-muted-foreground text-center py-6">No notifications</p>
           ) : (
             notifications.map((notif) => (
               <button
@@ -60,11 +59,44 @@ function NotificationList({ onSelect }: { onSelect?: () => void }) {
   );
 }
 
-export function NotificationCenter() {
+/**
+ * NotificationCenter — two modes:
+ * - `inline` (default false): renders as a collapsible section inside a menu
+ * - standalone (no inline): renders the old bell icon with sheet/popover
+ */
+export function NotificationCenter({ inline }: { inline?: boolean }) {
   const { unreadCount } = useCreator();
-  const isMobile = useIsMobile();
+  const [open, setOpen] = useState(false);
 
-  const bellButton = (
+  if (inline) {
+    return (
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger asChild>
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-muted transition-colors text-left">
+            <div className="relative">
+              <Bell className="w-4 h-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </div>
+            <span className="flex-1">Notifications</span>
+            {unreadCount > 0 && (
+              <span className="text-xs text-primary font-medium">{unreadCount} new</span>
+            )}
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <NotificationList />
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  }
+
+  // Standalone bell button (fallback, not currently used)
+  return (
     <button className="relative p-2 rounded-lg hover:bg-muted transition-colors">
       <Bell className="w-5 h-5" />
       {unreadCount > 0 && (
@@ -73,28 +105,5 @@ export function NotificationCenter() {
         </span>
       )}
     </button>
-  );
-
-  if (isMobile) {
-    return (
-      <Sheet>
-        <SheetTrigger asChild>{bellButton}</SheetTrigger>
-        <SheetContent side="top" className="max-h-[70vh]">
-          <SheetHeader>
-            <SheetTitle className="sr-only">Notifications</SheetTitle>
-          </SheetHeader>
-          <NotificationList />
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>{bellButton}</PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-1">
-        <NotificationList />
-      </PopoverContent>
-    </Popover>
   );
 }

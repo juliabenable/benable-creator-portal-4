@@ -80,7 +80,7 @@ function StickyCTA({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className="h-24 md:hidden" />
-      <div className="fixed bottom-16 left-0 right-0 z-30 md:static md:z-auto">
+      <div className="fixed bottom-0 left-0 right-0 z-30 md:static md:z-auto">
         <div className="bg-gradient-to-t from-background via-background to-transparent pt-4 pb-4 px-4 md:p-0 md:bg-none">
           <div className="max-w-lg mx-auto">{children}</div>
         </div>
@@ -1386,16 +1386,28 @@ function ContentApprovedStep({ campaign }: StepProps) {
   const isPreWindow = adminOverride ? false : now < windowStart;
   const isInWindow = adminOverride ? true : (now >= windowStart && now <= windowEnd);
 
-  // All links must have URLs before completing
-  const allLinksFilled = links.every((l) => l.url.trim() !== '');
+  // Only required (non-extra) links must have URLs before completing
+  const requiredLinks = links.filter((l) => !l.id.startsWith('pub-extra-'));
+  const allRequiredFilled = requiredLinks.every((l) => l.url.trim() !== '');
   const filledCount = links.filter((l) => l.url.trim() !== '').length;
 
   function updateLink(id: string, field: keyof ContentLinkEntry, value: string) {
     setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
   }
 
+  function addLink() {
+    setLinks((prev) => [
+      ...prev,
+      { id: `pub-extra-${Date.now()}`, platform: '', type: 'link' as const, url: '' },
+    ]);
+  }
+
+  function removeLink(id: string) {
+    setLinks((prev) => prev.filter((l) => l.id !== id));
+  }
+
   function handlePublishClick() {
-    if (!allLinksFilled) {
+    if (!allRequiredFilled) {
       setShowMissingLinksPrompt(true);
       return;
     }
@@ -1456,29 +1468,64 @@ function ContentApprovedStep({ campaign }: StepProps) {
             </p>
           </div>
 
-          {links.map((link) => (
-            <Card key={link.id}>
-              <CardContent className="py-3 space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{link.platform}</span>
-                  {link.url.trim() ? (
-                    <Badge className="bg-primary text-white text-[10px] px-1.5 py-0 border-0 ml-auto">✓ Submitted</Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-auto text-muted-foreground">Required</Badge>
+          {links.map((link) => {
+            const isExtra = link.id.startsWith('pub-extra-');
+            return (
+              <Card key={link.id}>
+                <CardContent className="py-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    {isExtra ? (
+                      <Input
+                        placeholder="Platform name..."
+                        value={link.platform}
+                        onChange={(e) => updateLink(link.id, 'platform', e.target.value)}
+                        className="h-7 text-sm font-medium w-36 px-2"
+                      />
+                    ) : (
+                      <span className="text-sm font-medium">{link.platform}</span>
+                    )}
+                    {link.url.trim() ? (
+                      <Badge className="bg-primary text-white text-[10px] px-1.5 py-0 border-0 ml-auto">✓ Submitted</Badge>
+                    ) : isExtra ? (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-auto text-muted-foreground">Optional</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-auto text-muted-foreground">Required</Badge>
+                    )}
+                    {isExtra && (
+                      <button
+                        type="button"
+                        onClick={() => removeLink(link.id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors ml-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  <Input
+                    placeholder={`Paste your live ${link.platform || 'content'} link...`}
+                    value={link.url}
+                    onChange={(e) => updateLink(link.id, 'url', e.target.value)}
+                    className="h-9"
+                  />
+                  {link.url && (
+                    <ContentLinkPreview platform={link.platform || 'Other'} url={link.url} />
                   )}
-                </div>
-                <Input
-                  placeholder={`Paste your live ${link.platform} link...`}
-                  value={link.url}
-                  onChange={(e) => updateLink(link.id, 'url', e.target.value)}
-                  className="h-9"
-                />
-                {link.url && (
-                  <ContentLinkPreview platform={link.platform} url={link.url} />
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
+
+          {/* Add more links button */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={addLink}
+          >
+            <Plus className="w-4 h-4 mr-1.5" />
+            Add Another Link
+          </Button>
 
           {/* Progress indicator */}
           <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
@@ -1512,7 +1559,7 @@ function ContentApprovedStep({ campaign }: StepProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Missing Live Links</AlertDialogTitle>
             <AlertDialogDescription>
-              You still need to add {links.length - filledCount} live link{links.length - filledCount > 1 ? 's' : ''} before
+              You still need to add {requiredLinks.filter((l) => !l.url.trim()).length} required live link{requiredLinks.filter((l) => !l.url.trim()).length > 1 ? 's' : ''} before
               completing the campaign. Please paste the public URL for each piece of published content.
             </AlertDialogDescription>
           </AlertDialogHeader>
