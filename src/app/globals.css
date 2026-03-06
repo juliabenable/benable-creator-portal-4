@@ -6,7 +6,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -139,27 +139,36 @@
    ================================================================ */
 
 [data-theme="soft"] {
-  --radius: 0.5rem;
+  /* Border radius: design system md=12px for base, lg=16px for cards */
+  --radius: 0.75rem;
+  /* Neutrals: from Benable design system */
   --background: #FAFAFA;
   --foreground: #1C1C1C;
   --card: #FFFFFF;
   --card-foreground: #1C1C1C;
   --popover: #FFFFFF;
   --popover-foreground: #1C1C1C;
+  /* Accent purple: kept from design system */
   --primary: #7A5CFA;
   --primary-foreground: #FFFFFF;
-  --secondary: #F1EEFE;
+  /* Secondary: design system action-bg-light */
+  --secondary: #F5F3FC;
   --secondary-foreground: #393939;
+  /* Muted: design system default-bg-weak + default-text-medium */
   --muted: #F1F1F1;
   --muted-foreground: #717171;
-  --accent: #E4DEFE;
+  /* Accent: light purple from design system */
+  --accent: #F5F3FC;
   --accent-foreground: #1C1C1C;
+  /* Semantic: from design system */
   --destructive: #FF5567;
   --border: #E3E3E3;
-  --input: #E3E3E3;
-  --ring: #7A5CFA;
+  --input: #C6C6C6;
+  --ring: #AE94F9;
+  /* Success: design system success-text-strong #18906C, border #2BAF87 */
   --success: #2BAF87;
   --success-foreground: #FFFFFF;
+  /* Warning: design system warning-text-strong #E88E2C */
   --warning: #FFA747;
   --warning-foreground: #393939;
   --brand-accent: #7A5CFA;
@@ -172,10 +181,10 @@
   --sidebar-foreground: #1C1C1C;
   --sidebar-primary: #7A5CFA;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F1EEFE;
+  --sidebar-accent: #F5F3FC;
   --sidebar-accent-foreground: #393939;
   --sidebar-border: #E3E3E3;
-  --sidebar-ring: #7A5CFA;
+  --sidebar-ring: #AE94F9;
 }
 
 /* ================================================================
@@ -278,7 +287,7 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   }
 }
 
@@ -301,33 +310,46 @@
    Clean elevation, professional transitions, purposeful whitespace
    ================================================================ */
 
-/* Font: Inter (from Figma Design System) */
+/* Font: Inter body + Helvetica Neue titles (from Benable Design System) */
 [data-theme="soft"] body {
   font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
+/* Title typography: Helvetica Neue per design system */
+[data-theme="soft"] h1,
+[data-theme="soft"] h2,
+[data-theme="soft"] h3,
+[data-theme="soft"] h4,
+[data-theme="soft"] h5,
+[data-theme="soft"] h6,
+[data-theme="soft"] [data-slot="card-title"],
+[data-theme="soft"] .section-title,
+[data-theme="soft"] .brand-name {
+  font-family: "Helvetica Neue", "Helvetica", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
 
-/* Cards: Airbnb-style clean elevation, subtle border + shadow combo */
+/* Cards: design system lg radius (16px), official shadow */
 [data-theme="soft"] [data-slot="card"] {
   border-color: #E3E3E3;
   border-width: 1px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
-  border-radius: 0.75rem;
+  box-shadow: 0px 4px 24px rgba(0,0,0,0.08);
+  border-radius: 1rem;
   transition: box-shadow 200ms ease, transform 200ms ease;
 }
 [data-theme="soft"] [data-slot="card"]:hover {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.08);
+  box-shadow: 0px 8px 30px rgba(0,0,0,0.10);
 }
 /* Clean, subtle lift on interactive cards */
 [data-theme="soft"] [data-slot="card"].cursor-pointer:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 12px 28px rgba(0,0,0,0.10);
+  box-shadow: 0px 16px 40px rgba(0,0,0,0.08);
 }
 
-/* Buttons: solid, confident, no heavy shadows */
+/* Buttons: design system md radius (12px), semibold Inter 14px */
 [data-theme="soft"] [data-slot="button"][data-variant="default"] {
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   box-shadow: none;
   font-weight: 600;
+  font-size: 0.875rem;
   transition: all 200ms ease;
 }
 [data-theme="soft"] [data-slot="button"][data-variant="default"]:hover {
@@ -336,13 +358,14 @@
   box-shadow: none;
 }
 [data-theme="soft"] [data-slot="button"][data-variant="outline"] {
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   border-color: #C6C6C6;
+  border-width: 1.5px;
   font-weight: 500;
   transition: all 200ms ease;
 }
 [data-theme="soft"] [data-slot="button"][data-variant="outline"]:hover {
-  background-color: #F1EEFE;
+  background-color: #F5F3FC;
   border-color: #7A5CFA;
   color: #7A5CFA;
 }
@@ -362,18 +385,20 @@
   height: 0.25rem;
 }
 
-/* Inputs: Airbnb-style clean focus states */
+/* Inputs: design system md radius (12px), focused border #AE94F9, bg #F5F3FC */
 [data-theme="soft"] input,
 [data-theme="soft"] textarea,
 [data-theme="soft"] [data-slot="select-trigger"] {
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   border-color: #C6C6C6;
-  transition: border-color 200ms ease, box-shadow 200ms ease;
+  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
 }
 [data-theme="soft"] input:focus,
 [data-theme="soft"] textarea:focus {
-  border-color: #7A5CFA;
-  box-shadow: 0 0 0 2px rgba(122, 92, 250, 0.15);
+  border-color: #AE94F9;
+  border-width: 2px;
+  background-color: #F5F3FC;
+  box-shadow: none;
 }
 
 /* Logo: gradient from purple to blue */
@@ -408,9 +433,9 @@
   animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-/* Collapsible cards: brand-tinted hover */
+/* Collapsible cards: brand-tinted hover using design system accent bg */
 [data-theme="soft"] button.rounded-xl:hover {
-  background-color: rgba(241, 238, 254, 0.5);
+  background-color: rgba(245, 243, 252, 0.6);
 }
 
 /* Icon containers: gradient tint for diversity */
@@ -688,30 +713,39 @@
   animation: theme-float 3s ease-in-out infinite;
 }
 
-/* Warning / amber overrides: warm neutrals instead of harsh yellow */
+/* Warning / amber overrides: design system warning colors */
 [data-theme="soft"] .bg-amber-50 {
-  background-color: #FDF5EF !important;
+  background-color: #FFF0E0 !important;
 }
 [data-theme="soft"] .bg-amber-100 {
-  background-color: #FCEADB !important;
+  background-color: #FFF0E0 !important;
 }
-[data-theme="soft"] .text-amber-500 {
-  color: #D97706 !important;
-}
+[data-theme="soft"] .text-amber-500,
 [data-theme="soft"] .text-amber-600 {
-  color: #C2660A !important;
+  color: #E88E2C !important;
 }
-[data-theme="soft"] .text-amber-700 {
-  color: #9A4F08 !important;
-}
-[data-theme="soft"] .text-amber-800 {
-  color: #7C3F06 !important;
-}
+[data-theme="soft"] .text-amber-700,
+[data-theme="soft"] .text-amber-800,
 [data-theme="soft"] .text-amber-900 {
-  color: #5F3005 !important;
+  color: #E88E2C !important;
 }
 [data-theme="soft"] .border-amber-200 {
-  border-color: #F5D5B8 !important;
+  border-color: #FFA747 !important;
+}
+
+/* Success text overrides: design system success-text-strong */
+[data-theme="soft"] .text-success,
+[data-theme="soft"] .text-green-600,
+[data-theme="soft"] .text-green-700 {
+  color: #18906C !important;
+}
+/* Success bg: design system success-bg-weak */
+[data-theme="soft"] .bg-green-50 {
+  background-color: #EFFBF7 !important;
+}
+/* Error bg: design system danger-bg-weak */
+[data-theme="soft"] .bg-red-50 {
+  background-color: #FFF1F1 !important;
 }
 
 /* Soft theme: professional pulse timing */

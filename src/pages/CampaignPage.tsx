@@ -92,6 +92,38 @@ function ContentLinkPreview({ platform, url }: { platform: string; url: string }
   );
 }
 
+/* ─── Uploaded Asset Preview — shows simulated uploaded file ─── */
+function UploadedAssetPreview({ platform, fileName, caption }: { platform: string; fileName: string; caption?: string }) {
+  const isVideo = fileName.match(/\.(mp4|mov|webm|avi)$/i);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+          isVideo ? 'bg-gradient-to-br from-purple-500 to-pink-500' : 'bg-gradient-to-br from-sky-400 to-blue-500'
+        }`}>
+          {isVideo ? (
+            <FileText className="w-5 h-5 text-white" />
+          ) : (
+            <Image className="w-5 h-5 text-white" />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-medium text-muted-foreground">{isVideo ? 'Video' : 'Image'} · {platform}</p>
+          <p className="text-sm truncate font-medium">{fileName}</p>
+        </div>
+        <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+      </div>
+      {caption && (
+        <div className="px-3 py-2 bg-muted/50 rounded-lg border border-border/50">
+          <p className="text-[10px] font-medium text-muted-foreground mb-0.5">Caption</p>
+          <p className="text-xs leading-relaxed">{caption}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Help/Contact Footer ─── */
 function HelpFooter() {
   return (
@@ -905,13 +937,15 @@ function CampaignBriefCollapsible({ campaign }: StepProps) {
 /* ─── Step: Content Upload (Flat layout + inline compliance per deliverable) ─── */
 function ContentUploadStep({ campaign }: StepProps) {
   const { setCampaignStep, updateCampaignField } = useCreator();
-  const [links, setLinks] = useState<(ContentLinkEntry & { imageMode?: boolean })[]>(
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [entries, setEntries] = useState<(ContentLinkEntry & { uploading?: boolean })[]>(
     ['Benable Post', ...campaign.requiredPlatforms].map((p, i) => ({
-      id: `link-${i}`,
+      id: `entry-${i}`,
       platform: p,
-      type: 'link' as const,
+      type: 'upload' as const,
       url: '',
-      imageMode: false,
+      fileName: '',
+      caption: '',
     }))
   );
   const [checking, setChecking] = useState(false);
@@ -919,15 +953,27 @@ function ContentUploadStep({ campaign }: StepProps) {
     Record<string, { label: string; ok: boolean }[]> | null
   >(null);
 
-  function addLink() {
-    setLinks((prev) => [
+  function addEntry() {
+    setEntries((prev) => [
       ...prev,
-      { id: `link-${Date.now()}`, platform: 'TikTok', type: 'link' as const, url: '', imageMode: false },
+      { id: `entry-${Date.now()}`, platform: 'TikTok', type: 'upload' as const, url: '', fileName: '', caption: '' },
     ]);
   }
 
-  function updateLink(id: string, field: string, value: string | boolean) {
-    setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
+  function updateEntry(id: string, field: string, value: string | boolean) {
+    setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, [field]: value } : e)));
+  }
+
+  function simulateUpload(id: string, file: File) {
+    updateEntry(id, 'uploading', true);
+    // Simulate upload delay
+    setTimeout(() => {
+      setEntries((prev) => prev.map((e) =>
+        e.id === id
+          ? { ...e, fileName: file.name, url: URL.createObjectURL(file), uploading: false }
+          : e
+      ));
+    }, 1200);
   }
 
   function runPreCheck() {
@@ -935,13 +981,14 @@ function ContentUploadStep({ campaign }: StepProps) {
     setPreCheckResults(null);
     setTimeout(() => {
       const results: Record<string, { label: string; ok: boolean }[]> = {};
-      links.forEach((link) => {
-        const hasContent = link.url.trim() || link.imageMode;
-        const isBenable = link.platform.includes('Benable');
-        results[link.id] = [
-          { label: `Brand tag @${campaign.brandName.replace(/\s/g, '')} in caption`, ok: !isBenable },
+      entries.forEach((entry) => {
+        const hasContent = entry.fileName || entry.url.trim();
+        const isBenable = entry.platform.includes('Benable');
+        results[entry.id] = [
+          { label: `Brand tag @${campaign.brandName.replace(/\s/g, '')} in caption`, ok: !isBenable && !!entry.caption?.trim() },
           { label: `Required hashtags included`, ok: isBenable ? true : Math.random() > 0.3 },
-          { label: 'Content provided', ok: !!hasContent },
+          { label: 'Content uploaded', ok: !!hasContent },
+          { label: 'Caption provided', ok: !!entry.caption?.trim() },
         ];
       });
       setPreCheckResults(results);
@@ -950,7 +997,7 @@ function ContentUploadStep({ campaign }: StepProps) {
   }
 
   function handleSubmit() {
-    updateCampaignField(campaign.id, { contentSubmissions: links.filter((l) => l.url || l.imageMode) });
+    updateCampaignField(campaign.id, { contentSubmissions: entries.filter((e) => e.fileName || e.caption?.trim()) });
     window.scrollTo(0, 0);
     setCampaignStep(campaign.id, 'content_review');
     toast.success('Content submitted for review!');
@@ -965,7 +1012,7 @@ function ContentUploadStep({ campaign }: StepProps) {
       <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
         <Upload className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
         <p className="text-xs text-amber-800">
-          Submit drafts for review by <strong>{campaign.contentDueDate}</strong>. Do not publish — content must be approved first.
+          Submit your content for review by <strong>{campaign.contentDueDate}</strong>. Do not publish — content must be approved first.
         </p>
       </div>
 
@@ -976,22 +1023,22 @@ function ContentUploadStep({ campaign }: StepProps) {
       <div className="px-1">
         <h3 className="text-base font-semibold">Submit Your Content</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Share draft links to your content before publishing.
+          Upload your image or video and add your caption for each deliverable.
         </p>
       </div>
 
       {/* Flat deliverable list — each deliverable is its own card with inline compliance */}
-      {links.map((link) => {
-        const checks = preCheckResults?.[link.id];
+      {entries.map((entry) => {
+        const checks = preCheckResults?.[entry.id];
         const hasIssues = checks?.some((c) => !c.ok);
 
         return (
-          <Card key={link.id} className={checks ? (hasIssues ? 'border-amber-200' : 'border-success/30') : ''}>
+          <Card key={entry.id} className={checks ? (hasIssues ? 'border-amber-200' : 'border-success/30') : ''}>
             <CardContent className="py-3 space-y-2.5">
               {/* Header row */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Select value={link.platform} onValueChange={(v) => updateLink(link.id, 'platform', v)}>
+                  <Select value={entry.platform} onValueChange={(v) => updateEntry(entry.id, 'platform', v)}>
                     <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {CONTENT_PLATFORMS.map((p) => (
@@ -1007,39 +1054,58 @@ function ContentUploadStep({ campaign }: StepProps) {
                 </div>
               </div>
 
-              {/* Content input — stacked, not side by side */}
-              {link.imageMode ? (
-                <div className="flex items-center gap-2 h-9 px-3 border rounded-md bg-muted/50 text-sm text-muted-foreground cursor-pointer">
-                  <Image className="w-4 h-4" />
-                  <span>Upload image</span>
+              {/* Upload area */}
+              {entry.uploading ? (
+                <div className="flex items-center justify-center gap-2 py-6 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5">
+                  <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                  <span className="text-sm text-primary font-medium">Uploading...</span>
                 </div>
-              ) : link.url.trim() ? (
-                /* Show uploaded link preview when link is entered */
+              ) : entry.fileName ? (
+                /* Show uploaded asset preview */
                 <div className="space-y-1.5">
-                  <ContentLinkPreview platform={link.platform} url={link.url} />
+                  <UploadedAssetPreview platform={entry.platform} fileName={entry.fileName} />
                   <button
-                    onClick={() => updateLink(link.id, 'url', '')}
+                    onClick={() => {
+                      updateEntry(entry.id, 'fileName', '');
+                      updateEntry(entry.id, 'url', '');
+                    }}
                     className="text-[11px] text-primary hover:underline flex items-center gap-1"
                   >
-                    <Edit3 className="w-3 h-3" /> Edit link
+                    <Edit3 className="w-3 h-3" /> Replace file
                   </button>
                 </div>
               ) : (
-                <Input
-                  placeholder={`Paste draft ${link.platform} link...`}
-                  value={link.url}
-                  onChange={(e) => updateLink(link.id, 'url', e.target.value)}
-                  className="h-9"
-                />
-              )}
-              {!link.url.trim() && (
-                <button
-                  onClick={() => updateLink(link.id, 'imageMode', !link.imageMode)}
-                  className="text-[11px] text-primary hover:underline"
+                /* Upload drop zone */
+                <div
+                  className="border-2 border-dashed border-border rounded-lg px-4 py-5 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors"
+                  onClick={() => fileInputRefs.current[entry.id]?.click()}
                 >
-                  {link.imageMode ? 'Switch to link' : 'Upload an image instead'}
-                </button>
+                  <Upload className="w-6 h-6 text-muted-foreground mx-auto mb-1.5" />
+                  <p className="text-sm font-medium">Upload image or video</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">JPG, PNG, MP4, MOV — max 100MB</p>
+                  <input
+                    ref={(el) => { fileInputRefs.current[entry.id] = el; }}
+                    type="file"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) simulateUpload(entry.id, file);
+                    }}
+                  />
+                </div>
               )}
+
+              {/* Caption / text input */}
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Caption</Label>
+                <Textarea
+                  placeholder="Write your caption here... Include hashtags and @mentions"
+                  value={entry.caption || ''}
+                  onChange={(e) => updateEntry(entry.id, 'caption', e.target.value)}
+                  className="min-h-[80px] text-sm resize-none"
+                />
+              </div>
 
               {/* Inline compliance check results for THIS deliverable */}
               {checks && (
@@ -1075,7 +1141,7 @@ function ContentUploadStep({ campaign }: StepProps) {
           variant="outline"
           size="sm"
           className="w-full"
-          onClick={addLink}
+          onClick={addEntry}
         >
           <Plus className="w-4 h-4 mr-1.5" />
           Add Another Deliverable
@@ -1147,7 +1213,7 @@ function ContentReviewStep({ campaign }: StepProps) {
         </CardContent>
       </Card>
 
-      {/* Show submitted links */}
+      {/* Show submitted content */}
       {campaign.contentSubmissions.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
@@ -1155,7 +1221,9 @@ function ContentReviewStep({ campaign }: StepProps) {
           </CardHeader>
           <CardContent className="space-y-2">
             {campaign.contentSubmissions.map((sub, i) => (
-              <ContentLinkPreview key={i} platform={sub.platform} url={sub.url} />
+              sub.fileName
+                ? <UploadedAssetPreview key={i} platform={sub.platform} fileName={sub.fileName} caption={sub.caption} />
+                : <ContentLinkPreview key={i} platform={sub.platform} url={sub.url} />
             ))}
           </CardContent>
         </Card>
@@ -1166,10 +1234,11 @@ function ContentReviewStep({ campaign }: StepProps) {
   );
 }
 
-/* ─── Step: Compliance Feedback (Per-Deliverable with Link Resubmission) ─── */
+/* ─── Step: Compliance Feedback (Per-Deliverable with Asset Resubmission) ─── */
 function ComplianceFeedbackStep({ campaign }: StepProps) {
   const { setCampaignStep } = useCreator();
   const checklist = campaign.complianceChecklist || [];
+  const resubFileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Group feedback by deliverable (simulate grouping)
   const deliverables = [
@@ -1183,9 +1252,9 @@ function ComplianceFeedbackStep({ campaign }: StepProps) {
     },
   ];
 
-  const [resubLinks, setResubLinks] = useState<Record<string, string>>({
-    'TikTok': '',
-    'IG Reel': '',
+  const [resubData, setResubData] = useState<Record<string, { fileName: string; caption: string; uploading?: boolean }>>({
+    'TikTok': { fileName: '', caption: '' },
+    'IG Reel': { fileName: '', caption: '' },
   });
 
   return (
@@ -1284,28 +1353,59 @@ function ComplianceFeedbackStep({ campaign }: StepProps) {
                     </div>
                   ))}
 
-                  {/* Resubmit link for this deliverable */}
+                  {/* Resubmit content for this deliverable */}
                   {needsWork && (
-                    <div className="space-y-1.5 pt-2 border-t">
-                      <Label className="text-xs">Updated {del.platform} Link</Label>
-                      {resubLinks[del.platform]?.trim() ? (
+                    <div className="space-y-2.5 pt-2 border-t">
+                      <Label className="text-xs font-semibold">Updated {del.platform} Content</Label>
+                      {resubData[del.platform]?.uploading ? (
+                        <div className="flex items-center justify-center gap-2 py-5 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5">
+                          <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                          <span className="text-sm text-primary font-medium">Uploading...</span>
+                        </div>
+                      ) : resubData[del.platform]?.fileName ? (
                         <div className="space-y-1.5">
-                          <ContentLinkPreview platform={del.platform} url={resubLinks[del.platform]} />
+                          <UploadedAssetPreview platform={del.platform} fileName={resubData[del.platform].fileName} />
                           <button
-                            onClick={() => setResubLinks((prev) => ({ ...prev, [del.platform]: '' }))}
+                            onClick={() => setResubData((prev) => ({ ...prev, [del.platform]: { ...prev[del.platform], fileName: '' } }))}
                             className="text-[11px] text-primary hover:underline flex items-center gap-1"
                           >
-                            <Edit3 className="w-3 h-3" /> Edit link
+                            <Edit3 className="w-3 h-3" /> Replace file
                           </button>
                         </div>
                       ) : (
-                        <Input
-                          placeholder="Paste updated content link..."
-                          value={resubLinks[del.platform] || ''}
-                          onChange={(e) => setResubLinks((prev) => ({ ...prev, [del.platform]: e.target.value }))}
-                          className="h-9"
-                        />
+                        <div
+                          className="border-2 border-dashed border-border rounded-lg px-4 py-4 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors"
+                          onClick={() => resubFileRefs.current[del.platform]?.click()}
+                        >
+                          <Upload className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
+                          <p className="text-sm font-medium">Upload updated asset</p>
+                          <p className="text-[11px] text-muted-foreground">Image or video</p>
+                          <input
+                            ref={(el) => { resubFileRefs.current[del.platform] = el; }}
+                            type="file"
+                            accept="image/*,video/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setResubData((prev) => ({ ...prev, [del.platform]: { ...prev[del.platform], uploading: true } }));
+                                setTimeout(() => {
+                                  setResubData((prev) => ({ ...prev, [del.platform]: { ...prev[del.platform], fileName: file.name, uploading: false } }));
+                                }, 1200);
+                              }
+                            }}
+                          />
+                        </div>
                       )}
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Updated Caption</Label>
+                        <Textarea
+                          placeholder="Write your updated caption..."
+                          value={resubData[del.platform]?.caption || ''}
+                          onChange={(e) => setResubData((prev) => ({ ...prev, [del.platform]: { ...prev[del.platform], caption: e.target.value } }))}
+                          className="min-h-[70px] text-sm resize-none"
+                        />
+                      </div>
                     </div>
                   )}
                 </CardContent>

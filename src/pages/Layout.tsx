@@ -72,7 +72,7 @@ export default function Layout() {
           <div className="logo-mark w-7 h-7 rounded-lg bg-gradient-to-br from-[#7A5CFA] to-[#47B3FF] flex items-center justify-center">
             <span className="text-white font-bold text-sm">B</span>
           </div>
-          <span className="brand-name font-semibold text-lg tracking-tight">benable</span>
+          <span className="brand-name font-bold text-lg tracking-tight">benable</span>
         </button>
         <HeaderMenu />
       </header>

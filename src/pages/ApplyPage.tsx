@@ -78,8 +78,9 @@ export default function ApplyPage() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  // Pre-populate from invitation email (simulated for prototype)
+  const [name, setName] = useState('Sarah Johnson');
+  const [email, setEmail] = useState('sarah.johnson@email.com');
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 

@@ -60,6 +60,10 @@ export type ContentLinkEntry = {
   platform: string;
   type: 'link' | 'upload';
   url: string;
+  /** Simulated uploaded file name (prototype only) */
+  fileName?: string;
+  /** Caption / written text accompanying the upload */
+  caption?: string;
 };
 
 export type PostingScheduleType = 'asap' | 'specific_date' | 'window';
