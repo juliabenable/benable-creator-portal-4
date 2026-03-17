@@ -39,8 +39,6 @@ import {
   Hash,
   CheckCircle2,
   AlertTriangle,
-  Gift,
-  Copy,
   Package,
   Upload,
   ExternalLink,
@@ -52,7 +50,6 @@ import {
   ChevronDown,
   AlertCircle,
   XCircle,
-  ThumbsUp,
   ThumbsDown,
   MapPin,
   Plus,
@@ -74,9 +71,8 @@ function ContentLinkPreview({ platform, url }: { platform: string; url: string }
   if (!url) return null;
 
   const isTikTok = platform.toLowerCase().includes('tiktok');
-  const isBenable = platform.toLowerCase().includes('benable');
-  const bgColor = isTikTok ? 'bg-black' : isBenable ? 'bg-primary' : 'bg-gradient-to-br from-purple-600 to-pink-500';
-  const label = isTikTok ? 'TT' : isBenable ? 'BN' : 'IG';
+  const bgColor = isTikTok ? 'bg-black' : 'bg-gradient-to-br from-purple-600 to-pink-500';
+  const label = isTikTok ? 'TT' : 'IG';
 
   return (
     <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
@@ -136,7 +132,6 @@ function HelpFooter() {
 
 /* ─── Platform options for content ─── */
 const CONTENT_PLATFORMS = [
-  { value: 'Benable Post', label: 'Benable Post' },
   { value: 'TikTok', label: 'TikTok' },
   { value: 'IG Post', label: 'IG Post' },
   { value: 'IG Reel', label: 'IG Reel' },
@@ -244,142 +239,11 @@ function StepContent({ campaign }: { campaign: Campaign }) {
 
 type StepProps = { campaign: Campaign };
 
-/* ─── Step: Interest Check (Are you interested?) ─── */
+/* ─── Step: Interest Check (Full Campaign Brief — single step accept/decline) ─── */
 function InterestCheckStep({ campaign }: StepProps) {
   const { setCampaignStep, updateCampaignField } = useCreator();
   const [showDecline, setShowDecline] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
-
-  return (
-    <div className="space-y-4">
-      {/* Interest Banner */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="py-5 text-center">
-          <Sparkles className="w-10 h-10 text-primary mx-auto mb-3" />
-          <h3 className="font-semibold text-lg">New Campaign Opportunity</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {campaign.brandName} is interested in working with you!
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Campaign Overview */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Campaign Overview</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Brand info */}
-          <div className="flex items-center gap-3 pb-3 border-b">
-            <BrandAvatar campaign={campaign} size="md" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold">{campaign.brandName}</p>
-              <p className="text-xs text-muted-foreground leading-snug mt-0.5">
-                Clean, plant-based skincare rooted in nature. Crafted with sustainably sourced botanicals for radiant, healthy skin.
-              </p>
-            </div>
-          </div>
-
-          <p className="text-sm text-muted-foreground">{campaign.description}</p>
-
-          <Separator />
-
-          {/* Brief summary bullet points */}
-          <div className="space-y-2">
-            {campaign.briefSummary.map((point, i) => (
-              <div key={i} className="flex items-start gap-2 text-sm">
-                <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <span>{point}</span>
-              </div>
-            ))}
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-primary shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground">Compensation</p>
-              <p className="text-sm font-medium">{campaign.paymentDetails}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Accept / Decline Actions */}
-      {!showDecline ? (
-        <StickyCTA>
-          <div className="space-y-3">
-            <Button
-              className="w-full h-12 text-base font-semibold"
-              onClick={() => {
-                window.scrollTo(0, 0);
-                setCampaignStep(campaign.id, 'invitation');
-                toast.success("Great! Review the full campaign brief to accept.");
-              }}
-            >
-              <ThumbsUp className="w-5 h-5 mr-2" />
-              I'm Interested
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full h-12 text-base"
-              onClick={() => setShowDecline(true)}
-            >
-              <ThumbsDown className="w-5 h-5 mr-2" />
-              Not This Time
-            </Button>
-          </div>
-        </StickyCTA>
-      ) : (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">No problem! Help us understand why</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-xs text-muted-foreground">
-              Please let us know why this campaign isn't a fit. This helps us send you better
-              matches in the future.
-            </p>
-            <Textarea
-              placeholder="e.g. Not available during this timeframe, doesn't align with my content, already have a competing partnership..."
-              value={declineReason}
-              onChange={(e) => setDeclineReason(e.target.value)}
-              rows={3}
-            />
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowDecline(false)}
-              >
-                Go Back
-              </Button>
-              <Button
-                variant="destructive"
-                className="flex-1"
-                disabled={!declineReason.trim()}
-                onClick={() => {
-                  updateCampaignField(campaign.id, {
-                    declined: true,
-                    declineReason: declineReason,
-                  });
-                  toast('Campaign declined. We\'ll find you a better match!');
-                }}
-              >
-                Decline Campaign
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-}
-
-/* ─── Step: Campaign Invitation (Full Brief — Scroll-to-Accept) ─── */
-function InvitationStep({ campaign }: StepProps) {
-  const { setCampaignStep } = useCreator();
   const briefEndRef = useRef<HTMLDivElement>(null);
   const [hasScrolledToEnd, setHasScrolledToEnd] = useState(false);
   const [showCommitDialog, setShowCommitDialog] = useState(false);
@@ -394,14 +258,18 @@ function InvitationStep({ campaign }: StepProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
-        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-800">
-          Read the full campaign brief below and scroll to the end to accept.
-        </p>
-      </div>
+      {/* Interest Banner */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="py-5 text-center">
+          <Sparkles className="w-10 h-10 text-primary mx-auto mb-3" />
+          <h3 className="font-semibold text-lg">New Campaign Opportunity</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            {campaign.brandName} is interested in working with you!
+          </p>
+        </CardContent>
+      </Card>
 
-      {/* Full Campaign Brief — Scrollable like T&C */}
+      {/* Full Campaign Brief — Scrollable */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
@@ -414,6 +282,17 @@ function InvitationStep({ campaign }: StepProps) {
             className="max-h-[400px] overflow-y-auto px-5 pb-5 space-y-5"
             onScroll={handleBriefScroll}
           >
+            {/* Brand info */}
+            <div className="flex items-center gap-3 pb-3 border-b">
+              <BrandAvatar campaign={campaign} size="md" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold">{campaign.brandName}</p>
+                <p className="text-xs text-muted-foreground leading-snug mt-0.5">
+                  Clean, plant-based skincare rooted in nature. Crafted with sustainably sourced botanicals for radiant, healthy skin.
+                </p>
+              </div>
+            </div>
+
             <p className="text-sm text-muted-foreground leading-relaxed">{campaign.description}</p>
 
             <Separator />
@@ -500,18 +379,72 @@ function InvitationStep({ campaign }: StepProps) {
         </CardContent>
       </Card>
 
-      <StickyCTA>
-        <Button
-          className="w-full h-12 text-base font-semibold"
-          disabled={!hasScrolledToEnd}
-          onClick={() => setShowCommitDialog(true)}
-        >
-          <ShieldCheck className="w-5 h-5 mr-2" />
-          {hasScrolledToEnd ? 'Accept & Commit' : 'Read brief to accept'}
-        </Button>
-      </StickyCTA>
+      {/* Accept / Decline Actions */}
+      {!showDecline ? (
+        <StickyCTA>
+          <div className="space-y-3">
+            <Button
+              className="w-full h-12 text-base font-semibold"
+              disabled={!hasScrolledToEnd}
+              onClick={() => setShowCommitDialog(true)}
+            >
+              <ShieldCheck className="w-5 h-5 mr-2" />
+              {hasScrolledToEnd ? 'Accept & Commit' : 'Read brief to accept'}
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full h-12 text-base"
+              onClick={() => setShowDecline(true)}
+            >
+              <ThumbsDown className="w-5 h-5 mr-2" />
+              Not This Time
+            </Button>
+          </div>
+        </StickyCTA>
+      ) : (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">No problem! Help us understand why</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Please let us know why this campaign isn't a fit. This helps us send you better
+              matches in the future.
+            </p>
+            <Textarea
+              placeholder="e.g. Not available during this timeframe, doesn't align with my content, already have a competing partnership..."
+              value={declineReason}
+              onChange={(e) => setDeclineReason(e.target.value)}
+              rows={3}
+            />
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowDecline(false)}
+              >
+                Go Back
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex-1"
+                disabled={!declineReason.trim()}
+                onClick={() => {
+                  updateCampaignField(campaign.id, {
+                    declined: true,
+                    declineReason: declineReason,
+                  });
+                  toast('Campaign declined. We\'ll find you a better match!');
+                }}
+              >
+                Decline Campaign
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Commitment confirmation dialog — double acceptance */}
+      {/* Commitment confirmation dialog */}
       <AlertDialog open={showCommitDialog} onOpenChange={setShowCommitDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -552,6 +485,14 @@ function InvitationStep({ campaign }: StepProps) {
   );
 }
 
+/* ─── InvitationStep now redirects to interest_check (merged) ─── */
+function InvitationStep({ campaign }: StepProps) {
+  const { setCampaignStep } = useCreator();
+  // If somehow we land on 'invitation' step, redirect to product_phase
+  setCampaignStep(campaign.id, 'product_phase');
+  return null;
+}
+
 /* ─── Step: Product Phase (with product choice + address confirm/modify + checkout) ─── */
 function ProductPhaseStep({ campaign }: StepProps) {
   const { setCampaignStep, updateCampaignField } = useCreator();
@@ -577,42 +518,63 @@ function ProductPhaseStep({ campaign }: StepProps) {
             <p className="text-xs text-muted-foreground -mt-1">
               {campaign.brandName} is offering you a choice. Select the one you'd like to feature.
             </p>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {campaign.productOptions!.map((option) => {
                 const isSelected = selectedProductId === option.id;
+                const productUrl = `https://${campaign.brandName.toLowerCase().replace(/\s+/g, '')}.com`;
                 return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedProductId(option.id);
-                      updateCampaignField(campaign.id, { selectedProduct: option.id });
-                      toast.success(`Selected: ${option.name}`);
-                    }}
-                    className={`w-full text-left rounded-lg border-2 p-4 transition-all ${
-                      isSelected
-                        ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-                        : 'border-border hover:border-primary/40 hover:bg-muted/50'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                          isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30'
-                        }`}
+                  <div key={option.id} className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedProductId(option.id);
+                        updateCampaignField(campaign.id, { selectedProduct: option.id });
+                        toast.success(`Selected: ${option.name}`);
+                      }}
+                      className={`w-full text-left rounded-lg border-2 overflow-hidden transition-all ${
+                        isSelected
+                          ? 'border-primary ring-1 ring-primary/20'
+                          : 'border-border hover:border-primary/40'
+                      }`}
+                    >
+                      {/* Product image — landscape, prominent */}
+                      <a
+                        href={productUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="block w-full aspect-[16/9] bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center relative group"
                       >
-                        {isSelected && <Check className="w-3 h-3 text-white" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-semibold ${isSelected ? 'text-primary' : ''}`}>
-                          {option.name}
-                        </p>
-                        {option.description && (
-                          <p className="text-xs text-muted-foreground mt-0.5">{option.description}</p>
+                        {option.imageUrl ? (
+                          <img src={option.imageUrl} alt={option.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full aspect-[16/9] bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                            <Package className="w-10 h-10 text-muted-foreground/40" />
+                          </div>
                         )}
+                        <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                        </div>
+                      </a>
+                      <div className="p-4 flex items-start gap-3">
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                            isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30'
+                          }`}
+                        >
+                          {isSelected && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-semibold ${isSelected ? 'text-primary' : ''}`}>
+                            {option.name}
+                          </p>
+                          {option.description && (
+                            <p className="text-xs text-muted-foreground mt-0.5">{option.description}</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </button>
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -715,50 +677,6 @@ function ProductPhaseStep({ campaign }: StepProps) {
         </CardContent>
       </Card>
 
-      {/* Product Code + Checkout Instructions */}
-      <Card className={!productChosen ? 'opacity-50 pointer-events-none' : ''}>
-        <CardHeader className="pb-1">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Gift className="w-4 h-4 text-primary" />
-            Your Product Code
-          </CardTitle>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Use your product code at checkout. Add products to your cart, enter the code in the promo/gift code field, and complete your order.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {campaign.productCode && (
-            <div className="bg-muted rounded-lg p-4 flex items-center justify-between">
-              <code className="text-sm font-mono font-semibold">{campaign.productCode}</code>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  navigator.clipboard.writeText(campaign.productCode || '');
-                  toast.success('Code copied!');
-                }}
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
-
-          {/* Store link */}
-          <a
-            href={`https://${campaign.brandName.toLowerCase().replace(/\s+/g, '')}.com`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg hover:bg-primary/10 transition-colors group"
-          >
-            <ExternalLink className="w-4 h-4 text-primary shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-primary group-hover:underline">Visit Store</p>
-              <p className="text-[11px] text-muted-foreground">Shop and redeem your code at the brand's website</p>
-            </div>
-          </a>
-        </CardContent>
-      </Card>
-
       <StickyCTA>
         <Button
           className="w-full h-12 text-base font-semibold"
@@ -818,57 +736,12 @@ function OrderPlacedStep({ campaign }: StepProps) {
   );
 }
 
-/* ─── Step: Order Received ─── */
+/* ─── Step: Order Received — skip directly to content upload ─── */
 function OrderReceivedStep({ campaign }: StepProps) {
   const { setCampaignStep } = useCreator();
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-success/5 border border-success/20">
-        <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
-        <p className="text-xs text-muted-foreground">
-          <strong className="text-foreground">Product received!</strong> Time to create your content. Review the requirements below.
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Content Requirements Reminder</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-1.5">
-            {campaign.requirements.map((req, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                {req}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {campaign.hashtags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <StickyCTA>
-        <Button
-          className="w-full h-12 text-base font-semibold"
-          onClick={() => {
-            window.scrollTo(0, 0);
-            setCampaignStep(campaign.id, 'content_upload');
-            toast.success('Ready to upload your content!');
-          }}
-        >
-          <Upload className="w-5 h-5 mr-2" />
-          Start Creating Content
-        </Button>
-      </StickyCTA>
-    </div>
-  );
+  // Skip this step — go directly to content upload
+  setCampaignStep(campaign.id, 'content_upload');
+  return null;
 }
 
 /* ─── Collapsible Campaign Brief (Full) ─── */
@@ -938,25 +811,21 @@ function CampaignBriefCollapsible({ campaign }: StepProps) {
 function ContentUploadStep({ campaign }: StepProps) {
   const { setCampaignStep, updateCampaignField } = useCreator();
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const [entries, setEntries] = useState<(ContentLinkEntry & { uploading?: boolean })[]>(
-    ['Benable Post', ...campaign.requiredPlatforms].map((p, i) => ({
+  const [entries, setEntries] = useState<(ContentLinkEntry & { uploading?: boolean; isFixed?: boolean })[]>(
+    campaign.requiredPlatforms.map((p, i) => ({
       id: `entry-${i}`,
       platform: p,
       type: 'upload' as const,
       url: '',
       fileName: '',
       caption: '',
+      isFixed: true,
     }))
   );
-  const [checking, setChecking] = useState(false);
-  const [preCheckResults, setPreCheckResults] = useState<
-    Record<string, { label: string; ok: boolean }[]> | null
-  >(null);
-
   function addEntry() {
     setEntries((prev) => [
       ...prev,
-      { id: `entry-${Date.now()}`, platform: 'TikTok', type: 'upload' as const, url: '', fileName: '', caption: '' },
+      { id: `entry-${Date.now()}`, platform: 'TikTok', type: 'upload' as const, url: '', fileName: '', caption: '', isFixed: false },
     ]);
   }
 
@@ -966,7 +835,6 @@ function ContentUploadStep({ campaign }: StepProps) {
 
   function simulateUpload(id: string, file: File) {
     updateEntry(id, 'uploading', true);
-    // Simulate upload delay
     setTimeout(() => {
       setEntries((prev) => prev.map((e) =>
         e.id === id
@@ -976,36 +844,12 @@ function ContentUploadStep({ campaign }: StepProps) {
     }, 1200);
   }
 
-  function runPreCheck() {
-    setChecking(true);
-    setPreCheckResults(null);
-    setTimeout(() => {
-      const results: Record<string, { label: string; ok: boolean }[]> = {};
-      entries.forEach((entry) => {
-        const hasContent = entry.fileName || entry.url.trim();
-        const isBenable = entry.platform.includes('Benable');
-        results[entry.id] = [
-          { label: `Brand tag @${campaign.brandName.replace(/\s/g, '')} in caption`, ok: !isBenable && !!entry.caption?.trim() },
-          { label: `Required hashtags included`, ok: isBenable ? true : Math.random() > 0.3 },
-          { label: 'Content uploaded', ok: !!hasContent },
-          { label: 'Caption provided', ok: !!entry.caption?.trim() },
-        ];
-      });
-      setPreCheckResults(results);
-      setChecking(false);
-    }, 2500);
-  }
-
   function handleSubmit() {
     updateCampaignField(campaign.id, { contentSubmissions: entries.filter((e) => e.fileName || e.caption?.trim()) });
     window.scrollTo(0, 0);
     setCampaignStep(campaign.id, 'content_review');
     toast.success('Content submitted for review!');
   }
-
-  const allPassed = preCheckResults
-    ? Object.values(preCheckResults).every((checks) => checks.every((c) => c.ok))
-    : false;
 
   return (
     <div className="space-y-4">
@@ -1016,8 +860,37 @@ function ContentUploadStep({ campaign }: StepProps) {
         </p>
       </div>
 
-      {/* Collapsible brief for reference */}
-      <CampaignBriefCollapsible campaign={campaign} />
+      {/* Full brief at top for reference */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <FileText className="w-4 h-4 text-primary" />
+            Campaign Brief
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">{campaign.description}</p>
+          <ul className="space-y-1.5">
+            {campaign.requirements.map((req, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                {req}
+              </li>
+            ))}
+          </ul>
+          <div className="flex flex-wrap gap-1.5">
+            {campaign.hashtags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Calendar className="w-4 h-4 text-primary shrink-0" />
+            Content due: <strong>{campaign.contentDueDate}</strong>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Submit Your Content heading */}
       <div className="px-1">
@@ -1029,27 +902,23 @@ function ContentUploadStep({ campaign }: StepProps) {
 
       {/* Flat deliverable list — each deliverable is its own card with inline compliance */}
       {entries.map((entry) => {
-        const checks = preCheckResults?.[entry.id];
-        const hasIssues = checks?.some((c) => !c.ok);
-
         return (
-          <Card key={entry.id} className={checks ? (hasIssues ? 'border-amber-200' : 'border-success/30') : ''}>
+          <Card key={entry.id}>
             <CardContent className="py-3 space-y-2.5">
               {/* Header row */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Select value={entry.platform} onValueChange={(v) => updateEntry(entry.id, 'platform', v)}>
-                    <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {CONTENT_PLATFORMS.map((p) => (
-                        <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {checks && (
-                    hasIssues
-                      ? <Badge className="bg-amber-100 text-amber-700 text-[10px] border-0">Needs Attention</Badge>
-                      : <Badge className="bg-success/10 text-success text-[10px] border-0">Pass</Badge>
+                  {entry.isFixed ? (
+                    <span className="text-sm font-semibold">{entry.platform}</span>
+                  ) : (
+                    <Select value={entry.platform} onValueChange={(v) => updateEntry(entry.id, 'platform', v)}>
+                      <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {CONTENT_PLATFORMS.map((p) => (
+                          <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
                 </div>
               </div>
@@ -1105,81 +974,47 @@ function ContentUploadStep({ campaign }: StepProps) {
                   onChange={(e) => updateEntry(entry.id, 'caption', e.target.value)}
                   className="min-h-[80px] text-sm resize-none"
                 />
+                {/* Requirements for this caption */}
+                <div className="space-y-1 pt-1">
+                  {campaign.requirements
+                    .filter((req) => req.toLowerCase().includes('caption') || req.toLowerCase().includes('mention') || req.toLowerCase().includes('hashtag') || req.toLowerCase().includes('include'))
+                    .map((req, ri) => (
+                      <p key={ri} className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                        <AlertCircle className="w-3 h-3 text-primary shrink-0" />
+                        {req}
+                      </p>
+                    ))}
+                  {campaign.hashtags.length > 0 && (
+                    <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
+                      <AlertCircle className="w-3 h-3 text-primary shrink-0 mt-0.5" />
+                      <span>Include hashtags: {campaign.hashtags.join(' ')}</span>
+                    </p>
+                  )}
+                </div>
               </div>
 
-              {/* Inline compliance check results for THIS deliverable */}
-              {checks && (
-                <div className="space-y-1.5 pt-1 border-t">
-                  {checks.map((check, ci) => (
-                    <div
-                      key={ci}
-                      className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs ${
-                        check.ok ? 'bg-success/5' : 'bg-red-50'
-                      }`}
-                    >
-                      {check.ok ? (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
-                      ) : (
-                        <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
-                      )}
-                      <span className={check.ok ? 'text-muted-foreground' : 'text-red-600 font-medium'}>
-                        {check.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </CardContent>
           </Card>
         );
       })}
 
-      {/* Add another deliverable — only before pre-check */}
-      {!preCheckResults && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={addEntry}
-        >
-          <Plus className="w-4 h-4 mr-1.5" />
-          Add Another Deliverable
-        </Button>
-      )}
-
-      {/* Error message if compliance has issues */}
-      {preCheckResults && !allPassed && (
-        <p className="text-xs text-red-600 font-medium px-1">
-          Some items need attention. Please fix them before submitting.
-        </p>
-      )}
+      {/* Add another deliverable */}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="w-full"
+        onClick={addEntry}
+      >
+        <Plus className="w-4 h-4 mr-1.5" />
+        Add Another Deliverable
+      </Button>
 
       <StickyCTA>
-        {!preCheckResults ? (
-          <Button
-            className="w-full h-12 text-base font-semibold"
-            onClick={runPreCheck}
-            disabled={checking}
-          >
-            {checking ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Checking compliance...
-              </>
-            ) : (
-              <>
-                <ShieldCheck className="w-5 h-5 mr-2" />
-                Check & Submit for Review
-              </>
-            )}
-          </Button>
-        ) : (
-          <Button className="w-full h-12 text-base font-semibold" onClick={handleSubmit}>
-            <Send className="w-5 h-5 mr-2" />
-            Submit for Review
-          </Button>
-        )}
+        <Button className="w-full h-12 text-base font-semibold" onClick={handleSubmit}>
+          <Send className="w-5 h-5 mr-2" />
+          Submit for Review
+        </Button>
       </StickyCTA>
 
       <UpcomingSteps
@@ -1234,13 +1069,12 @@ function ContentReviewStep({ campaign }: StepProps) {
   );
 }
 
-/* ─── Step: Compliance Feedback (Per-Deliverable with Asset Resubmission) ─── */
+/* ─── Step: Compliance Feedback (Per-Deliverable, no re-upload) ─── */
 function ComplianceFeedbackStep({ campaign }: StepProps) {
   const { setCampaignStep } = useCreator();
   const checklist = campaign.complianceChecklist || [];
-  const resubFileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  // Group feedback by deliverable (simulate grouping)
+  // Group feedback by deliverable
   const deliverables = [
     {
       platform: 'TikTok',
@@ -1252,21 +1086,9 @@ function ComplianceFeedbackStep({ campaign }: StepProps) {
     },
   ];
 
-  const [resubData, setResubData] = useState<Record<string, { fileName: string; caption: string; uploading?: boolean }>>({
-    'TikTok': { fileName: '', caption: '' },
-    'IG Reel': { fileName: '', caption: '' },
-  });
-
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-red-50 border border-red-200">
-        <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-        <p className="text-xs text-red-800">
-          <strong>Changes needed.</strong> Review the feedback for each deliverable and resubmit.
-        </p>
-      </div>
-
-      {/* Reviewer Notes — speech bubble style within white tile */}
+      {/* Reviewer Notes — speech bubble style */}
       {campaign.complianceNotes && (
         <Card>
           <CardContent className="py-4 space-y-2">
@@ -1289,7 +1111,7 @@ function ComplianceFeedbackStep({ campaign }: StepProps) {
         </Card>
       )}
 
-      {/* Per-deliverable feedback with drawers */}
+      {/* Per-deliverable feedback — separate section for TikTok and Instagram */}
       {deliverables.map((del) => {
         const needsWork = del.items.some((item) => item.status !== 'approved');
         return (
@@ -1352,62 +1174,6 @@ function ComplianceFeedbackStep({ campaign }: StepProps) {
                       </div>
                     </div>
                   ))}
-
-                  {/* Resubmit content for this deliverable */}
-                  {needsWork && (
-                    <div className="space-y-2.5 pt-2 border-t">
-                      <Label className="text-xs font-semibold">Updated {del.platform} Content</Label>
-                      {resubData[del.platform]?.uploading ? (
-                        <div className="flex items-center justify-center gap-2 py-5 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5">
-                          <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                          <span className="text-sm text-primary font-medium">Uploading...</span>
-                        </div>
-                      ) : resubData[del.platform]?.fileName ? (
-                        <div className="space-y-1.5">
-                          <UploadedAssetPreview platform={del.platform} fileName={resubData[del.platform].fileName} />
-                          <button
-                            onClick={() => setResubData((prev) => ({ ...prev, [del.platform]: { ...prev[del.platform], fileName: '' } }))}
-                            className="text-[11px] text-primary hover:underline flex items-center gap-1"
-                          >
-                            <Edit3 className="w-3 h-3" /> Replace file
-                          </button>
-                        </div>
-                      ) : (
-                        <div
-                          className="border-2 border-dashed border-border rounded-lg px-4 py-4 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors"
-                          onClick={() => resubFileRefs.current[del.platform]?.click()}
-                        >
-                          <Upload className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
-                          <p className="text-sm font-medium">Upload updated asset</p>
-                          <p className="text-[11px] text-muted-foreground">Image or video</p>
-                          <input
-                            ref={(el) => { resubFileRefs.current[del.platform] = el; }}
-                            type="file"
-                            accept="image/*,video/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                setResubData((prev) => ({ ...prev, [del.platform]: { ...prev[del.platform], uploading: true } }));
-                                setTimeout(() => {
-                                  setResubData((prev) => ({ ...prev, [del.platform]: { ...prev[del.platform], fileName: file.name, uploading: false } }));
-                                }, 1200);
-                              }
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="space-y-1">
-                        <Label className="text-xs text-muted-foreground">Updated Caption</Label>
-                        <Textarea
-                          placeholder="Write your updated caption..."
-                          value={resubData[del.platform]?.caption || ''}
-                          onChange={(e) => setResubData((prev) => ({ ...prev, [del.platform]: { ...prev[del.platform], caption: e.target.value } }))}
-                          className="min-h-[70px] text-sm resize-none"
-                        />
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </CollapsibleContent>
             </Card>
@@ -1415,20 +1181,17 @@ function ComplianceFeedbackStep({ campaign }: StepProps) {
         );
       })}
 
-      {/* Collapsible brief */}
-      <CampaignBriefCollapsible campaign={campaign} />
-
       <StickyCTA>
         <Button
           className="w-full h-12 text-base font-semibold"
           onClick={() => {
             window.scrollTo(0, 0);
             setCampaignStep(campaign.id, 'content_approved');
-            toast.success('Updated content submitted!');
+            toast.success('Moving to publish!');
           }}
         >
-          <Upload className="w-5 h-5 mr-2" />
-          Resubmit Updated Content
+          <CheckCircle2 className="w-5 h-5 mr-2" />
+          Post as Approved
         </Button>
       </StickyCTA>
     </div>
@@ -1439,7 +1202,7 @@ function ComplianceFeedbackStep({ campaign }: StepProps) {
 function ContentApprovedStep({ campaign }: StepProps) {
   const { setCampaignStep, updateCampaignField } = useCreator();
   const [links, setLinks] = useState<ContentLinkEntry[]>(
-    ['Benable Post', ...campaign.requiredPlatforms].map((p, i) => ({
+    campaign.requiredPlatforms.map((p, i) => ({
       id: `pub-${i}`,
       platform: p,
       type: 'link' as const,
@@ -1451,13 +1214,11 @@ function ContentApprovedStep({ campaign }: StepProps) {
   // Determine publish window status — respect admin override
   const now = new Date();
   const windowStart = new Date(campaign.publishWindowStart);
-  const windowEnd = new Date(campaign.publishWindowEnd);
   const adminOverride = campaign.publishWindowOpen;
   const scheduleType = campaign.postingSchedule || 'window';
 
   // For ASAP or specific_date, skip the window waiting entirely
   const isPreWindow = scheduleType === 'window' ? (adminOverride ? false : now < windowStart) : false;
-  const isInWindow = scheduleType === 'window' ? (adminOverride ? true : (now >= windowStart && now <= windowEnd)) : true;
 
   // Only required (non-extra) links must have URLs before completing
   const requiredLinks = links.filter((l) => !l.id.startsWith('pub-extra-'));
@@ -1493,35 +1254,23 @@ function ContentApprovedStep({ campaign }: StepProps) {
 
   return (
     <div className="space-y-4">
-      {/* Content Approved + Posting Schedule — combined card */}
-      <Card>
-        <CardContent className="py-5 text-center space-y-3">
+      {/* Content Approved + Publish — single combined card */}
+      <Card className="border-primary bg-gradient-to-br from-primary/10 to-primary/5">
+        <CardContent className="py-6 text-center space-y-3">
           <CheckCircle2 className="w-10 h-10 text-success mx-auto" />
           <div>
-            <h3 className="font-semibold text-lg">Content Approved!</h3>
+            <h3 className="font-bold text-xl">Content Approved!</h3>
             <p className="text-sm text-muted-foreground mt-1">
               Your content has been approved by {campaign.brandName}.
             </p>
           </div>
           <Separator />
-          <div className="flex items-start gap-2 text-sm text-left">
-            <Calendar className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium">Posting Schedule</p>
-              {scheduleType === 'asap' && (
-                <p className="text-muted-foreground mt-0.5">Post as soon as possible</p>
-              )}
-              {scheduleType === 'specific_date' && (
-                <p className="text-muted-foreground mt-0.5">
-                  Post on <strong className="text-foreground">{campaign.postingDate || campaign.publishWindowStart}</strong>
-                </p>
-              )}
-              {scheduleType === 'window' && (
-                <p className="text-muted-foreground mt-0.5">
-                  Post between <strong className="text-foreground">{campaign.publishWindowStart}</strong> and <strong className="text-foreground">{campaign.publishWindowEnd}</strong>
-                </p>
-              )}
-            </div>
+          <Rocket className="w-10 h-10 text-primary mx-auto" />
+          <div>
+            <h3 className="font-semibold text-lg">Post ASAP</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Post your approved content now and submit the live links below.
+            </p>
           </div>
           {isPreWindow && (
             <div className="flex items-center gap-2 justify-center px-3 py-2 bg-muted rounded-lg mt-2">
@@ -1533,27 +1282,6 @@ function ContentApprovedStep({ campaign }: StepProps) {
           )}
         </CardContent>
       </Card>
-
-      {!isPreWindow && (
-        /* "Publish your content now" CTA when ready */
-        <Card className="border-primary bg-gradient-to-br from-primary/10 to-primary/5">
-          <CardContent className="py-6 text-center">
-            <Rocket className="w-14 h-14 text-primary mx-auto mb-3" />
-            <h3 className="font-bold text-xl">
-              {scheduleType === 'asap' ? 'Publish Now!' : 'Publish Your Content Now'}
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              {scheduleType === 'asap'
-                ? 'Your content is approved. Post it now and submit the live links below.'
-                : scheduleType === 'specific_date'
-                  ? <>Post your content on <strong>{campaign.postingDate || campaign.publishWindowStart}</strong> and submit the live links below.</>
-                  : isInWindow
-                    ? <>Your publish window is open until <strong>{campaign.publishWindowEnd}</strong>. Post your content and submit the live links below.</>
-                    : 'Post your approved content and submit the live links below.'}
-            </p>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Live Public Links Input — shown during/after window */}
       {!isPreWindow && (
