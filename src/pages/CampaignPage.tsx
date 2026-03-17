@@ -167,8 +167,6 @@ export default function CampaignPage() {
     );
   }
 
-  const isInterestCheck = campaign.currentStep === 'interest_check';
-
   return (
     <div className="max-w-lg mx-auto px-4 py-4 space-y-5">
       {/* Back button */}
@@ -180,27 +178,23 @@ export default function CampaignPage() {
         Back
       </button>
 
-      {/* Campaign Header with Brand Avatar — hide for interest_check (has its own header) */}
-      {!isInterestCheck && (
-        <div className="flex items-center gap-3">
-          <BrandAvatar campaign={campaign} size="lg" />
-          <div>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-              {campaign.brandName}
-            </p>
-            <h1 className="text-xl font-bold mt-0.5">{campaign.title}</h1>
-          </div>
+      {/* Campaign Header with Brand Avatar */}
+      <div className="flex items-center gap-3">
+        <BrandAvatar campaign={campaign} size="lg" />
+        <div>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+            {campaign.brandName}
+          </p>
+          <h1 className="text-xl font-bold mt-0.5">{campaign.title}</h1>
         </div>
-      )}
+      </div>
 
-      {/* Step Indicator — hide for interest_check */}
-      {!isInterestCheck && (
-        <Card className="py-4">
-          <CardContent>
-            <StepIndicator currentStep={campaign.currentStep} />
-          </CardContent>
-        </Card>
-      )}
+      {/* Step Indicator — always visible */}
+      <Card className="py-4">
+        <CardContent>
+          <StepIndicator currentStep={campaign.currentStep} />
+        </CardContent>
+      </Card>
 
       {/* Dynamic Step Content with Animation */}
       <div

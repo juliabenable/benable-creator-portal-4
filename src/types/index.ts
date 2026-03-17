@@ -126,8 +126,7 @@ export interface Campaign {
 }
 
 export const CAMPAIGN_STEPS: { key: CampaignStep; label: string }[] = [
-  { key: 'interest_check', label: 'Interest' },
-  { key: 'invitation', label: 'Accept' },
+  { key: 'interest_check', label: 'Brief' },
   { key: 'product_phase', label: 'Product' },
   { key: 'content_upload', label: 'Content' },
   { key: 'content_approved', label: 'Publish' },
@@ -137,21 +136,20 @@ export const CAMPAIGN_STEPS: { key: CampaignStep; label: string }[] = [
 export function getStepIndex(step: CampaignStep): number {
   switch (step) {
     case 'interest_check':
-      return 0;
     case 'invitation':
-      return 1;
+      return 0;
     case 'product_phase':
     case 'order_placed':
     case 'order_received':
-      return 2;
+      return 1;
     case 'content_upload':
     case 'content_review':
     case 'compliance_feedback':
-      return 3;
+      return 2;
     case 'content_approved':
-      return 4;
+      return 3;
     case 'completed':
-      return 5;
+      return 4;
   }
 }
 

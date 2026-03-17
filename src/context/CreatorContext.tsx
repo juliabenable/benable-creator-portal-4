@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { CreatorStatus, Campaign, CampaignStep, Notification } from '@/types';
 import { ALL_STEPS_ORDERED } from '@/types';
 
@@ -133,7 +133,7 @@ const CreatorContext = createContext<CreatorContextType | null>(null);
 
 export function CreatorProvider({ children }: { children: ReactNode }) {
   const [creatorName, setCreatorName] = useState('');
-  const [creatorStatus, setCreatorStatus] = useState<CreatorStatus>('not_applied');
+  const [creatorStatus, setCreatorStatus] = useState<CreatorStatus>('accepted');
   const [campaigns, setCampaigns] = useState<Campaign[]>(INITIAL_CAMPAIGNS);
   const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
 
@@ -205,6 +205,15 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
     setCampaigns(INITIAL_CAMPAIGNS);
     setNotifications(INITIAL_NOTIFICATIONS);
   }
+
+  // Expose helpers on window for Figma capture (temporary - remove after)
+  useEffect(() => {
+    (window as any).__setCampaignStep = (id: string, step: CampaignStep) => {
+      setCampaigns((prev) => prev.map((c) => c.id === id ? { ...c, currentStep: step } : c));
+    };
+    (window as any).__setCreatorStatus = setCreatorStatus;
+    (window as any).__setCampaigns = setCampaigns;
+  }, []);
 
   return (
     <CreatorContext.Provider
