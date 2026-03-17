@@ -61,7 +61,6 @@ import {
   Gift,
   CheckCircle,
   Settings2,
-  Target,
 } from 'lucide-react';
 import type { Campaign, ContentLinkEntry } from '@/types';
 import { StickyCTA } from '@/components/StickyCTA';
@@ -123,8 +122,8 @@ function UploadedAssetPreview({ platform, fileName, caption }: { platform: strin
 /* ─── Help/Contact Footer ─── */
 function HelpFooter() {
   return (
-    <div className="text-center text-xs text-muted-foreground py-4 mt-2">
-      Questions? Email <a href="mailto:collabs@benable.com" className="underline hover:text-foreground">collabs@benable.com</a>
+    <div className="text-center text-[13px] text-muted-foreground/80 py-5 mt-1">
+      Questions? Email <a href="mailto:collabs@benable.com" className="text-muted-foreground hover:text-foreground transition-colors">collabs@benable.com</a>
     </div>
   );
 }
@@ -242,6 +241,27 @@ function StepContent({ campaign }: { campaign: Campaign }) {
 
 type StepProps = { campaign: Campaign };
 
+/* ─── Inline SVG brand logo for brief header ─── */
+function BrandLogo28Litsea() {
+  return (
+    <div className="w-12 h-12 rounded-full bg-[#2a2a3d] flex items-center justify-center shrink-0 overflow-hidden">
+      <div className="text-center leading-none">
+        <span className="block text-white/90 text-[7px] font-light italic tracking-[0.15em]" style={{ fontFamily: 'Georgia, serif' }}>28</span>
+        <span className="block text-white/90 text-[6.5px] font-light tracking-[0.2em] uppercase mt-[1px]" style={{ fontFamily: 'Georgia, serif' }}>LITSEA</span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Green filled check icon matching design ─── */
+function GreenCheck() {
+  return (
+    <div className="w-[18px] h-[18px] rounded-full bg-green-500 flex items-center justify-center shrink-0">
+      <Check className="w-3 h-3 text-white" strokeWidth={3} />
+    </div>
+  );
+}
+
 /* ─── Step: Interest Check (Full Campaign Brief — matching Figma design) ─── */
 function InterestCheckStep({ campaign }: StepProps) {
   const { setCampaignStep, updateCampaignField } = useCreator();
@@ -256,37 +276,39 @@ function InterestCheckStep({ campaign }: StepProps) {
   return (
     <div className="space-y-4">
       {/* Main Brief Card */}
-      <Card className="overflow-hidden shadow-sm">
-        {/* Purple gradient header */}
-        <div className="bg-gradient-to-r from-purple-200 via-purple-100 to-purple-200/60 px-6 py-6">
-          <div className="flex items-center gap-3">
-            <BrandAvatar campaign={campaign} size="lg" />
+      <Card className="overflow-hidden shadow-md border-0">
+        {/* Purple gradient header — soft pastel lavender */}
+        <div className="bg-gradient-to-r from-[#d8c8f0] via-[#e4d6f6] to-[#ede0f8] px-6 py-7">
+          <div className="flex items-center gap-3.5">
+            <BrandLogo28Litsea />
             <div>
-              <h2 className="text-lg font-bold text-foreground">{campaign.title}</h2>
-              <p className="text-sm text-primary font-medium">by {campaign.brandName}</p>
+              <h2 className="text-[17px] font-bold text-foreground leading-snug">{campaign.title}</h2>
+              <p className="text-[13px] text-[#7c5cbf] font-medium mt-0.5">by {campaign.brandName}</p>
             </div>
           </div>
         </div>
 
-        <CardContent className="px-6 py-6 space-y-6">
+        <CardContent className="px-6 pt-7 pb-8 space-y-7">
           {/* About the Brand */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="flex items-center gap-2">
-              <Settings2 className="w-4 h-4 text-muted-foreground" />
-              <h3 className="font-semibold text-sm">About the Brand</h3>
+              <Settings2 className="w-[18px] h-[18px] text-muted-foreground/70" />
+              <h3 className="font-bold text-[15px]">About the Brand</h3>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-[14px] text-muted-foreground leading-relaxed">
               {campaign.brandAbout || 'Clean, plant-based skincare rooted in nature. Crafted with sustainably sourced botanicals for radiant, healthy skin.'}
             </p>
           </div>
 
           {/* Goal */}
-          <div className="border rounded-lg p-4 space-y-2">
+          <div className="border border-border/80 rounded-xl p-5 space-y-2.5">
             <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-muted-foreground" />
-              <h3 className="font-semibold text-sm">Goal</h3>
+              <svg className="w-[18px] h-[18px] text-muted-foreground/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
+              <h3 className="font-bold text-[15px]">Goal</h3>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-[14px] text-muted-foreground leading-relaxed">
               {campaign.description}
             </p>
           </div>
@@ -296,36 +318,41 @@ function InterestCheckStep({ campaign }: StepProps) {
           {/* Compensation */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Gift className="w-4 h-4 text-muted-foreground" />
-              <h3 className="font-semibold text-sm">Compensation</h3>
+              <Gift className="w-[18px] h-[18px] text-muted-foreground/70" />
+              <h3 className="font-bold text-[15px]">Compensation</h3>
             </div>
 
-            <div className="border rounded-lg p-4 space-y-3">
-              <Badge variant="outline" className="text-xs font-medium text-green-700 border-green-300 bg-green-50">
+            <div className="border border-border/80 rounded-xl p-5 space-y-3.5">
+              <Badge variant="outline" className="text-xs font-semibold text-green-700 border-green-400 bg-white rounded-full px-3 py-1">
                 {campaign.compensationType}
               </Badge>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-[14px] text-muted-foreground">
                 Choose 1 product from the selection below. This is the product you'll feature in your content.
               </p>
 
               {/* Product tile */}
               {firstProduct && (
-                <div className="flex items-center gap-3 pt-1">
-                  <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                <div className="flex items-center gap-3.5 pt-1">
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center shrink-0 overflow-hidden border border-border/40">
                     {firstProduct.imageUrl ? (
                       <img src={firstProduct.imageUrl} alt={firstProduct.name} className="w-full h-full object-cover" />
                     ) : (
-                      <Package className="w-6 h-6 text-muted-foreground/40" />
+                      <div className="flex flex-col items-center">
+                        <div className="w-6 h-8 rounded bg-gray-200/80 relative">
+                          <div className="absolute inset-x-1 top-1 h-3 rounded-sm bg-white/60" />
+                          <div className="absolute bottom-0 inset-x-0 h-2 bg-gray-300/50 rounded-b" />
+                        </div>
+                      </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold">{firstProduct.name}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[14px] font-bold">{firstProduct.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {firstProduct.size}{firstProduct.stock ? ` · ${firstProduct.stock} in stock` : ''}
                     </p>
                   </div>
                   {firstProduct.price && (
-                    <p className="text-sm font-semibold shrink-0">
+                    <p className="text-[15px] font-semibold shrink-0">
                       ${firstProduct.price.toFixed(2)}
                     </p>
                   )}
@@ -339,13 +366,13 @@ function InterestCheckStep({ campaign }: StepProps) {
           {/* Content Deliverable */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-muted-foreground" />
-              <h3 className="font-semibold text-sm">Content Deliverable</h3>
+              <FileText className="w-[18px] h-[18px] text-muted-foreground/70" />
+              <h3 className="font-bold text-[15px]">Content Deliverable</h3>
             </div>
-            <ul className="space-y-2">
+            <ul className="space-y-2.5">
               {deliverables.map((item, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                  <CheckCircle className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                <li key={i} className="flex items-start gap-2.5 text-[14px] text-muted-foreground">
+                  <span className="mt-[2px]"><GreenCheck /></span>
                   {item}
                 </li>
               ))}
@@ -359,13 +386,13 @@ function InterestCheckStep({ campaign }: StepProps) {
             <>
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-muted-foreground" />
-                  <h3 className="font-semibold text-sm">Other Instructions</h3>
+                  <CheckCircle className="w-[18px] h-[18px] text-muted-foreground/70" />
+                  <h3 className="font-bold text-[15px]">Other Instructions</h3>
                 </div>
-                <ul className="space-y-2">
+                <ul className="space-y-2.5">
                   {instructions.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <CheckCircle className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                    <li key={i} className="flex items-start gap-2.5 text-[14px] text-muted-foreground">
+                      <span className="mt-[2px]"><GreenCheck /></span>
                       {item}
                     </li>
                   ))}
@@ -379,10 +406,10 @@ function InterestCheckStep({ campaign }: StepProps) {
           {/* Terms & Commitments */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-muted-foreground" />
-              <h3 className="font-semibold text-sm">Terms & Commitments</h3>
+              <CheckCircle className="w-[18px] h-[18px] text-muted-foreground/70" />
+              <h3 className="font-bold text-[15px]">Terms & Commitments</h3>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-[14px] text-muted-foreground leading-relaxed">
               {campaign.termsText || 'You agree to deliver the content described above. All content must be submitted for review before publishing. You agree to keep the product and campaign details confidential until publication. UGC rights granted for 90 days across brand channels.'}
             </p>
           </div>

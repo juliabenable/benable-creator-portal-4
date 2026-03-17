@@ -37,6 +37,7 @@ const INITIAL_CAMPAIGNS: Campaign[] = [
       'Use natural lighting for all content',
     ],
     contentDeliverables: [
+      'Benable Post.',
       'Create 1 TikTok video (30–60 seconds) showcasing the product.',
       'Create 1 Instagram Reel featuring the product in your skincare routine.',
     ],
