@@ -35,8 +35,6 @@ import { toast } from 'sonner';
 import {
   ArrowLeft,
   Calendar,
-  DollarSign,
-  Hash,
   CheckCircle2,
   AlertTriangle,
   Package,
@@ -57,11 +55,13 @@ import {
   Loader2,
   Rocket,
   Image,
-  HelpCircle,
-  Sparkles,
   Home,
   Edit3,
   Check,
+  Gift,
+  CheckCircle,
+  Settings2,
+  Target,
 } from 'lucide-react';
 import type { Campaign, ContentLinkEntry } from '@/types';
 import { StickyCTA } from '@/components/StickyCTA';
@@ -123,9 +123,8 @@ function UploadedAssetPreview({ platform, fileName, caption }: { platform: strin
 /* ─── Help/Contact Footer ─── */
 function HelpFooter() {
   return (
-    <div className="flex items-center gap-2 justify-center text-xs text-muted-foreground py-3 mt-2">
-      <HelpCircle className="w-3.5 h-3.5" />
-      <span>Questions? Email <a href="mailto:collabs@benable.com" className="underline hover:text-foreground">collabs@benable.com</a></span>
+    <div className="text-center text-xs text-muted-foreground py-4 mt-2">
+      Questions? Email <a href="mailto:collabs@benable.com" className="underline hover:text-foreground">collabs@benable.com</a>
     </div>
   );
 }
@@ -168,6 +167,8 @@ export default function CampaignPage() {
     );
   }
 
+  const isInterestCheck = campaign.currentStep === 'interest_check';
+
   return (
     <div className="max-w-lg mx-auto px-4 py-4 space-y-5">
       {/* Back button */}
@@ -179,19 +180,21 @@ export default function CampaignPage() {
         Back
       </button>
 
-      {/* Campaign Header with Brand Avatar */}
-      <div className="flex items-center gap-3">
-        <BrandAvatar campaign={campaign} size="lg" />
-        <div>
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-            {campaign.brandName}
-          </p>
-          <h1 className="text-xl font-bold mt-0.5">{campaign.title}</h1>
+      {/* Campaign Header with Brand Avatar — hide for interest_check (has its own header) */}
+      {!isInterestCheck && (
+        <div className="flex items-center gap-3">
+          <BrandAvatar campaign={campaign} size="lg" />
+          <div>
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+              {campaign.brandName}
+            </p>
+            <h1 className="text-xl font-bold mt-0.5">{campaign.title}</h1>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Step Indicator — hide for interest_check */}
-      {campaign.currentStep !== 'interest_check' && (
+      {!isInterestCheck && (
         <Card className="py-4">
           <CardContent>
             <StepIndicator currentStep={campaign.currentStep} />
@@ -239,142 +242,149 @@ function StepContent({ campaign }: { campaign: Campaign }) {
 
 type StepProps = { campaign: Campaign };
 
-/* ─── Step: Interest Check (Full Campaign Brief — single step accept/decline) ─── */
+/* ─── Step: Interest Check (Full Campaign Brief — matching Figma design) ─── */
 function InterestCheckStep({ campaign }: StepProps) {
   const { setCampaignStep, updateCampaignField } = useCreator();
   const [showDecline, setShowDecline] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
-  const briefEndRef = useRef<HTMLDivElement>(null);
-  const [hasScrolledToEnd, setHasScrolledToEnd] = useState(false);
   const [showCommitDialog, setShowCommitDialog] = useState(false);
 
-  function handleBriefScroll(e: React.UIEvent<HTMLDivElement>) {
-    const el = e.currentTarget;
-    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 20;
-    if (atBottom) {
-      setHasScrolledToEnd(true);
-    }
-  }
+  const deliverables = campaign.contentDeliverables || campaign.requirements;
+  const instructions = campaign.otherInstructions || [];
+  const firstProduct = campaign.productOptions?.[0];
 
   return (
     <div className="space-y-4">
-      {/* Interest Banner */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="py-5 text-center">
-          <Sparkles className="w-10 h-10 text-primary mx-auto mb-3" />
-          <h3 className="font-semibold text-lg">New Campaign Opportunity</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {campaign.brandName} is interested in working with you!
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Full Campaign Brief — Scrollable */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
-            <FileText className="w-4 h-4 text-primary" />
-            Campaign Brief
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div
-            className="max-h-[400px] overflow-y-auto px-5 pb-5 space-y-5"
-            onScroll={handleBriefScroll}
-          >
-            {/* Brand info */}
-            <div className="flex items-center gap-3 pb-3 border-b">
-              <BrandAvatar campaign={campaign} size="md" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold">{campaign.brandName}</p>
-                <p className="text-xs text-muted-foreground leading-snug mt-0.5">
-                  Clean, plant-based skincare rooted in nature. Crafted with sustainably sourced botanicals for radiant, healthy skin.
-                </p>
-              </div>
-            </div>
-
-            <p className="text-sm text-muted-foreground leading-relaxed">{campaign.description}</p>
-
-            <Separator />
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-primary shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Compensation</p>
-                  <p className="text-sm font-medium">{campaign.paymentDetails}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Content Due</p>
-                  <p className="text-sm font-medium">{campaign.contentDueDate}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Posting Schedule</p>
-                  <p className="text-sm font-medium">
-                    {campaign.postingSchedule === 'asap'
-                      ? 'Post as soon as content is approved'
-                      : campaign.postingSchedule === 'specific_date'
-                        ? `Post on ${campaign.postingDate || campaign.publishWindowStart}`
-                        : `${campaign.publishWindowStart} — ${campaign.publishWindowEnd}`}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
+      {/* Main Brief Card */}
+      <Card className="overflow-hidden shadow-sm">
+        {/* Purple gradient header */}
+        <div className="bg-gradient-to-r from-purple-200 via-purple-100 to-purple-200/60 px-6 py-6">
+          <div className="flex items-center gap-3">
+            <BrandAvatar campaign={campaign} size="lg" />
             <div>
-              <p className="text-sm font-medium mb-2">Content Requirements</p>
-              <ul className="space-y-1.5">
-                {campaign.requirements.map((req, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    {req}
-                  </li>
-                ))}
-              </ul>
+              <h2 className="text-lg font-bold text-foreground">{campaign.title}</h2>
+              <p className="text-sm text-primary font-medium">by {campaign.brandName}</p>
+            </div>
+          </div>
+        </div>
+
+        <CardContent className="px-6 py-6 space-y-6">
+          {/* About the Brand */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Settings2 className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-semibold text-sm">About the Brand</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {campaign.brandAbout || 'Clean, plant-based skincare rooted in nature. Crafted with sustainably sourced botanicals for radiant, healthy skin.'}
+            </p>
+          </div>
+
+          {/* Goal */}
+          <div className="border rounded-lg p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-semibold text-sm">Goal</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {campaign.description}
+            </p>
+          </div>
+
+          <Separator />
+
+          {/* Compensation */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Gift className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-semibold text-sm">Compensation</h3>
             </div>
 
-            <div>
-              <p className="text-sm font-medium mb-2">Required Hashtags</p>
-              <div className="flex flex-wrap gap-1.5">
-                {campaign.hashtags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs">
-                    <Hash className="w-3 h-3 mr-0.5" />
-                    {tag.replace('#', '')}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+            <div className="border rounded-lg p-4 space-y-3">
+              <Badge variant="outline" className="text-xs font-medium text-green-700 border-green-300 bg-green-50">
+                {campaign.compensationType}
+              </Badge>
+              <p className="text-sm text-muted-foreground">
+                Choose 1 product from the selection below. This is the product you'll feature in your content.
+              </p>
 
-            <Separator />
-
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Terms & Commitments</p>
-              <ul className="space-y-1.5 text-xs text-muted-foreground">
-                <li>• You agree to deliver the content as described above by the due dates specified.</li>
-                <li>• All content must be submitted for review before publishing publicly.</li>
-                <li>• You may not publish any content from this campaign until it has been approved.</li>
-                <li>• You agree to keep the product and campaign details confidential until publication.</li>
-                <li>• The brand reserves the right to request revisions to submitted content.</li>
-                <li>• Compensation will be delivered after successful campaign completion.</li>
-              </ul>
-            </div>
-
-            <div ref={briefEndRef} className="pt-2">
-              {!hasScrolledToEnd && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <ChevronDown className="w-4 h-4 animate-bounce" />
-                  Scroll down to read the full brief before accepting
+              {/* Product tile */}
+              {firstProduct && (
+                <div className="flex items-center gap-3 pt-1">
+                  <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                    {firstProduct.imageUrl ? (
+                      <img src={firstProduct.imageUrl} alt={firstProduct.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Package className="w-6 h-6 text-muted-foreground/40" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold">{firstProduct.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {firstProduct.size}{firstProduct.stock ? ` · ${firstProduct.stock} in stock` : ''}
+                    </p>
+                  </div>
+                  {firstProduct.price && (
+                    <p className="text-sm font-semibold shrink-0">
+                      ${firstProduct.price.toFixed(2)}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
+          </div>
+
+          <Separator />
+
+          {/* Content Deliverable */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-semibold text-sm">Content Deliverable</h3>
+            </div>
+            <ul className="space-y-2">
+              {deliverables.map((item, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <Separator />
+
+          {/* Other Instructions */}
+          {instructions.length > 0 && (
+            <>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-muted-foreground" />
+                  <h3 className="font-semibold text-sm">Other Instructions</h3>
+                </div>
+                <ul className="space-y-2">
+                  {instructions.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                      <CheckCircle className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <Separator />
+            </>
+          )}
+
+          {/* Terms & Commitments */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-semibold text-sm">Terms & Commitments</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {campaign.termsText || 'You agree to deliver the content described above. All content must be submitted for review before publishing. You agree to keep the product and campaign details confidential until publication. UGC rights granted for 90 days across brand channels.'}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -385,11 +395,10 @@ function InterestCheckStep({ campaign }: StepProps) {
           <div className="space-y-3">
             <Button
               className="w-full h-12 text-base font-semibold"
-              disabled={!hasScrolledToEnd}
               onClick={() => setShowCommitDialog(true)}
             >
               <ShieldCheck className="w-5 h-5 mr-2" />
-              {hasScrolledToEnd ? 'Accept & Commit' : 'Read brief to accept'}
+              Accept & Commit
             </Button>
             <Button
               variant="outline"

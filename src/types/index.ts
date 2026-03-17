@@ -73,6 +73,9 @@ export interface ProductOption {
   name: string;
   description?: string;
   imageUrl?: string;
+  size?: string;
+  stock?: number;
+  price?: number;
 }
 
 export interface Campaign {
@@ -112,6 +115,14 @@ export interface Campaign {
   // Posting schedule — how/when the creator should publish after approval
   postingSchedule: PostingScheduleType;
   postingDate?: string; // for 'specific_date' type
+  // Brand about text for the brief
+  brandAbout?: string;
+  // Content deliverables (separate from requirements for display)
+  contentDeliverables?: string[];
+  // Other instructions (separate from requirements)
+  otherInstructions?: string[];
+  // Terms text (paragraph form)
+  termsText?: string;
 }
 
 export const CAMPAIGN_STEPS: { key: CampaignStep; label: string }[] = [

@@ -27,7 +27,7 @@ const INITIAL_CAMPAIGNS: Campaign[] = [
     title: 'Summer Glow Collection Launch',
     description:
       'Create engaging content showcasing our new Summer Glow Collection. We want authentic, creative content that highlights the product benefits and your personal skincare routine.',
-    compensationType: 'Gift Card + Product',
+    compensationType: 'Free product',
     currentStep: 'interest_check',
     requirements: [
       'Create 1 TikTok video (30-60 seconds) showcasing the product',
@@ -36,11 +36,21 @@ const INITIAL_CAMPAIGNS: Campaign[] = [
       'Show product packaging in at least 2 shots',
       'Use natural lighting for all content',
     ],
+    contentDeliverables: [
+      'Create 1 TikTok video (30–60 seconds) showcasing the product.',
+      'Create 1 Instagram Reel featuring the product in your skincare routine.',
+    ],
+    otherInstructions: [
+      'Use campaign hashtag #28Litsea #SummerGlow',
+      'Tag @28litsea in all posts',
+      'Show product in use (not just unboxing)',
+      'Post as soon as possible',
+    ],
     hashtags: ['#28Litsea', '#SummerGlow', '#SkincareRoutine', '#Ad', '#Gifted'],
     contentDueDate: '2026-03-20',
     publishWindowStart: '2026-03-25',
     publishWindowEnd: '2026-03-31',
-    paymentDetails: '$50 gift card + free product (valued at $85)',
+    paymentDetails: 'Free product',
     productType: 'product_choice',
     productCode: 'LYCIA-SUMMER-2026-XK9F',
     productOptions: [
@@ -49,12 +59,18 @@ const INITIAL_CAMPAIGNS: Campaign[] = [
         name: 'Summer Glow Serum',
         description: 'Lightweight, vitamin C-infused face serum for a radiant glow',
         imageUrl: '',
+        size: '30ml',
+        stock: 145,
+        price: 42.00,
       },
       {
         id: 'prod-2',
         name: 'Hydra Mist Toner',
         description: 'Refreshing toner with aloe vera and hyaluronic acid',
         imageUrl: '',
+        size: '100ml',
+        stock: 89,
+        price: 36.00,
       },
     ],
     postingSchedule: 'window',
@@ -77,6 +93,8 @@ const INITIAL_CAMPAIGNS: Campaign[] = [
       'Content due by March 20, publish window March 25–31',
     ],
     requiredPlatforms: ['TikTok', 'IG Reel'],
+    brandAbout: 'Ulta Beauty is a leading beauty retailer offering a wide range of cosmetics, skincare, and haircare products. Known for its inclusive approach, Ulta provides a unique shopping experience with both high-end and drugstore brands. The brand also emphasizes community engagement and customer satisfaction.',
+    termsText: 'You agree to deliver the content described above. All content must be submitted for review before publishing. You agree to keep the product and campaign details confidential until publication. UGC rights granted for 90 days across brand channels.',
   },
 ];
 
