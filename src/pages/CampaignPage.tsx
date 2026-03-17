@@ -34,6 +34,7 @@ import { useCreator } from '@/context/CreatorContext';
 import { toast } from 'sonner';
 import {
   ArrowLeft,
+  ArrowRight,
   Calendar,
   CheckCircle2,
   AlertTriangle,
@@ -535,9 +536,16 @@ function ProductPhaseStep({ campaign }: StepProps) {
   const [addressConfirmed, setAddressConfirmed] = useState(false);
   const [editingAddress, setEditingAddress] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string>(campaign.selectedProduct || '');
+  const [productPage, setProductPage] = useState(0);
 
   const hasProductChoice = campaign.productType === 'product_choice' && campaign.productOptions && campaign.productOptions.length > 1;
   const productChosen = hasProductChoice ? !!selectedProductId : true;
+
+  // Pagination: show 4 products at a time
+  const PRODUCTS_PER_PAGE = 4;
+  const allProducts = campaign.productOptions || [];
+  const totalPages = Math.ceil(allProducts.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = allProducts.slice(productPage * PRODUCTS_PER_PAGE, (productPage + 1) * PRODUCTS_PER_PAGE);
 
   return (
     <div className="space-y-4">
@@ -554,12 +562,12 @@ function ProductPhaseStep({ campaign }: StepProps) {
             <p className="text-xs text-muted-foreground -mt-1">
               {campaign.brandName} is offering you a choice. Select the one you'd like to feature.
             </p>
-            <div className="space-y-3">
-              {campaign.productOptions!.map((option) => {
+            <div className="grid grid-cols-2 gap-3">
+              {paginatedProducts.map((option) => {
                 const isSelected = selectedProductId === option.id;
                 const productUrl = `https://${campaign.brandName.toLowerCase().replace(/\s+/g, '')}.com`;
                 return (
-                  <div key={option.id} className="space-y-2">
+                  <div key={option.id}>
                     <button
                       type="button"
                       onClick={() => {
@@ -573,47 +581,74 @@ function ProductPhaseStep({ campaign }: StepProps) {
                           : 'border-border hover:border-primary/40'
                       }`}
                     >
-                      {/* Product image — landscape, prominent */}
-                      <a
-                        href={productUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="block w-full aspect-[16/9] bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center relative group"
-                      >
+                      {/* Product image — portrait / 3:4 ratio */}
+                      <div className="w-full aspect-[3/4] bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center relative">
                         {option.imageUrl ? (
                           <img src={option.imageUrl} alt={option.name} className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full aspect-[16/9] bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                            <Package className="w-10 h-10 text-muted-foreground/40" />
+                          <Package className="w-8 h-8 text-muted-foreground/40" />
+                        )}
+                        {/* Selection indicator overlay */}
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                            <Check className="w-3.5 h-3.5 text-white" />
                           </div>
                         )}
-                        <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                        </div>
-                      </a>
-                      <div className="p-4 flex items-start gap-3">
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                            isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30'
-                          }`}
-                        >
-                          {isSelected && <Check className="w-3 h-3 text-white" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-semibold ${isSelected ? 'text-primary' : ''}`}>
-                            {option.name}
-                          </p>
-                          {option.description && (
-                            <p className="text-xs text-muted-foreground mt-0.5">{option.description}</p>
-                          )}
-                        </div>
+                      </div>
+                      <div className="p-3">
+                        <p className={`text-sm font-semibold leading-tight ${isSelected ? 'text-primary' : ''}`}>
+                          {option.name}
+                        </p>
+                        {option.description && (
+                          <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{option.description}</p>
+                        )}
+                        {option.size && (
+                          <p className="text-[11px] text-muted-foreground mt-0.5">{option.size}</p>
+                        )}
                       </div>
                     </button>
+                    {/* "View on website" button — always visible, separate from card click */}
+                    <a
+                      href={productUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-1.5 text-xs text-primary font-medium mt-1.5 py-1.5 hover:underline"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      View on website
+                    </a>
                   </div>
                 );
               })}
             </div>
+
+            {/* Pagination controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={productPage === 0}
+                  onClick={() => setProductPage((p) => p - 1)}
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 mr-1" />
+                  Prev
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Page {productPage + 1} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={productPage >= totalPages - 1}
+                  onClick={() => setProductPage((p) => p + 1)}
+                >
+                  Next
+                  <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </div>
+            )}
+
             {selectedProductId && (
               <div className="flex items-center gap-2 text-sm text-primary">
                 <CheckCircle2 className="w-4 h-4" />
@@ -665,9 +700,23 @@ function ProductPhaseStep({ campaign }: StepProps) {
                   </Button>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-sm text-primary">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span className="font-medium">Address confirmed</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-primary">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span className="font-medium">Address confirmed</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground text-xs h-auto py-1 px-2"
+                    onClick={() => {
+                      setAddressConfirmed(false);
+                      setEditingAddress(true);
+                    }}
+                  >
+                    <Edit3 className="w-3 h-3 mr-1" />
+                    Edit
+                  </Button>
                 </div>
               )}
             </>
@@ -1001,6 +1050,38 @@ function ContentUploadStep({ campaign }: StepProps) {
                 </div>
               )}
 
+              {/* Requirements callout box — prominent, above caption */}
+              {(() => {
+                const captionReqs = campaign.requirements
+                  .filter((req) => req.toLowerCase().includes('caption') || req.toLowerCase().includes('mention') || req.toLowerCase().includes('hashtag') || req.toLowerCase().includes('include'));
+                const hasReqs = captionReqs.length > 0 || campaign.hashtags.length > 0;
+                if (!hasReqs) return null;
+                return (
+                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-2">
+                    <p className="text-xs font-semibold text-primary flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      Requirements for this post
+                    </p>
+                    <div className="space-y-1.5">
+                      {captionReqs.map((req, ri) => (
+                        <div key={ri} className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                          <p className="text-xs font-medium text-foreground">{req}</p>
+                        </div>
+                      ))}
+                      {campaign.hashtags.length > 0 && (
+                        <div className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                          <p className="text-xs font-medium text-foreground">
+                            Include hashtags: <span className="text-primary">{campaign.hashtags.join(' ')}</span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Caption / text input */}
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">Caption</Label>
@@ -1010,23 +1091,6 @@ function ContentUploadStep({ campaign }: StepProps) {
                   onChange={(e) => updateEntry(entry.id, 'caption', e.target.value)}
                   className="min-h-[80px] text-sm resize-none"
                 />
-                {/* Requirements for this caption */}
-                <div className="space-y-1 pt-1">
-                  {campaign.requirements
-                    .filter((req) => req.toLowerCase().includes('caption') || req.toLowerCase().includes('mention') || req.toLowerCase().includes('hashtag') || req.toLowerCase().includes('include'))
-                    .map((req, ri) => (
-                      <p key={ri} className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-                        <AlertCircle className="w-3 h-3 text-primary shrink-0" />
-                        {req}
-                      </p>
-                    ))}
-                  {campaign.hashtags.length > 0 && (
-                    <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-                      <AlertCircle className="w-3 h-3 text-primary shrink-0 mt-0.5" />
-                      <span>Include hashtags: {campaign.hashtags.join(' ')}</span>
-                    </p>
-                  )}
-                </div>
               </div>
 
             </CardContent>
@@ -1247,14 +1311,8 @@ function ContentApprovedStep({ campaign }: StepProps) {
   );
   const [showMissingLinksPrompt, setShowMissingLinksPrompt] = useState(false);
 
-  // Determine publish window status — respect admin override
-  const now = new Date();
-  const windowStart = new Date(campaign.publishWindowStart);
-  const adminOverride = campaign.publishWindowOpen;
-  const scheduleType = campaign.postingSchedule || 'window';
-
-  // For ASAP or specific_date, skip the window waiting entirely
-  const isPreWindow = scheduleType === 'window' ? (adminOverride ? false : now < windowStart) : false;
+  // Always allow posting — window is always open for MVP
+  const isPreWindow = false;
 
   // Only required (non-extra) links must have URLs before completing
   const requiredLinks = links.filter((l) => !l.id.startsWith('pub-extra-'));
@@ -1290,32 +1348,25 @@ function ContentApprovedStep({ campaign }: StepProps) {
 
   return (
     <div className="space-y-4">
-      {/* Content Approved + Publish — single combined card */}
-      <Card className="border-primary bg-gradient-to-br from-primary/10 to-primary/5">
-        <CardContent className="py-6 text-center space-y-3">
-          <CheckCircle2 className="w-10 h-10 text-success mx-auto" />
-          <div>
-            <h3 className="font-bold text-xl">Content Approved!</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Your content has been approved by {campaign.brandName}.
-            </p>
-          </div>
-          <Separator />
-          <Rocket className="w-10 h-10 text-primary mx-auto" />
-          <div>
-            <h3 className="font-semibold text-lg">Post ASAP</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Post your approved content now and submit the live links below.
-            </p>
-          </div>
-          {isPreWindow && (
-            <div className="flex items-center gap-2 justify-center px-3 py-2 bg-muted rounded-lg mt-2">
-              <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
-              <p className="text-xs text-muted-foreground font-medium">
-                Window opens on {campaign.publishWindowStart} — we'll notify you!
+      {/* Content Approved + Post ASAP — single polished card */}
+      <Card className="overflow-hidden border-0 shadow-md">
+        {/* Approved banner */}
+        <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-3 flex items-center gap-2.5">
+          <CheckCircle2 className="w-5 h-5 text-white" />
+          <h3 className="font-bold text-white text-base">Content Approved</h3>
+        </div>
+        <CardContent className="py-5 space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Rocket className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-base">Time to post!</h4>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Your content has been approved by {campaign.brandName}. Post it now and paste your live links below.
               </p>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 

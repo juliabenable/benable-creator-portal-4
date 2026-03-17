@@ -7,6 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from '@/components/ui/dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -33,6 +41,9 @@ import {
   Flower2,
   Sofa,
   Image,
+  Plus,
+  X,
+  Star,
 } from 'lucide-react';
 import { useCreator } from '@/context/CreatorContext';
 import { StickyCTA } from '@/components/StickyCTA';
@@ -55,6 +66,12 @@ const CONTENT_NICHES = [
 ];
 
 const PRODUCT_CATEGORIES = ['Skincare', 'Makeup', 'Haircare', 'Supplements', 'Clothing', 'Accessories', 'Home', 'Food & Drink'];
+
+const BRAND_NAMES = [
+  'Ulta Beauty', 'Sephora', 'Glossier', 'Fenty Beauty', 'Rare Beauty',
+  'Charlotte Tilbury', 'The Ordinary', 'Drunk Elephant', 'Sol de Janeiro',
+  'Olaplex', 'Tatcha', 'Summer Fridays', 'Kosas', 'Tower 28', 'Merit',
+];
 
 
 export default function ApplyPage() {
@@ -179,37 +196,69 @@ export default function ApplyPage() {
   );
 }
 
-/* ─── Step 0: VIP Welcome ─── */
+/* ─── Step 0: VIP Welcome (Premium, exciting with brand logos) ─── */
 function WelcomeStep() {
   return (
-    <div className="text-center space-y-4 py-4">
-      <div className="welcome-icon icon-container inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10">
-        <Sparkles className="w-7 h-7 text-primary" />
+    <div className="space-y-6 py-2">
+      {/* Hero gradient section */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-purple-100 to-pink-50 px-6 py-8 text-center">
+        {/* Decorative background elements */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-[0.07] pointer-events-none">
+          <div className="absolute top-4 left-6 w-20 h-20 rounded-full bg-primary" />
+          <div className="absolute bottom-6 right-8 w-16 h-16 rounded-full bg-pink-400" />
+          <div className="absolute top-12 right-16 w-10 h-10 rounded-full bg-purple-400" />
+        </div>
+
+        <div className="relative">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/80 shadow-sm mb-4">
+            <Sparkles className="w-8 h-8 text-primary" />
+          </div>
+          <Badge variant="secondary" className="text-xs mb-3 gap-1 bg-white/80">
+            <Crown className="w-3 h-3" />
+            By Invitation Only
+          </Badge>
+          <h1 className="text-2xl font-bold tracking-tight">You've Been Invited</h1>
+          <p className="text-muted-foreground mt-2 text-sm max-w-xs mx-auto">
+            Join a select group of creators with priority access to brand campaigns
+            as part of Benable's first creator program.
+          </p>
+        </div>
       </div>
-      <div>
-        <Badge variant="secondary" className="text-xs mb-2 gap-1">
-          <Crown className="w-3 h-3" />
-          By Invitation Only
-        </Badge>
-        <h1 className="text-2xl font-bold tracking-tight">You've Been Invited</h1>
-        <p className="text-muted-foreground mt-1.5 text-sm max-w-xs mx-auto">
-          Join a select group of creators with priority access to brand campaigns
-          as part of Benable's first creator program.
-        </p>
-      </div>
-      <div className="text-left max-w-xs mx-auto space-y-3">
+
+      {/* Benefits */}
+      <div className="space-y-3 px-1">
         {[
           { icon: Crown, text: 'Priority access to paid brand campaigns' },
           { icon: Globe, text: 'Work with top beauty, lifestyle & wellness brands' },
           { icon: Sparkles, text: 'Free products or gift cards + compensation for every campaign' },
         ].map((item, i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className="icon-container w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <item.icon className="w-4 h-4 text-primary" />
+            <div className="icon-container w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <item.icon className="w-4.5 h-4.5 text-primary" />
             </div>
-            <p className="text-sm">{item.text}</p>
+            <p className="text-sm font-medium">{item.text}</p>
           </div>
         ))}
+      </div>
+
+      {/* Brand logos / names marquee */}
+      <div className="space-y-2">
+        <p className="text-[11px] text-muted-foreground text-center uppercase tracking-wider font-medium">
+          Brands you could work with
+        </p>
+        <div className="relative overflow-hidden rounded-xl bg-muted/50 py-4">
+          <div className="flex flex-wrap justify-center gap-2 px-4">
+            {BRAND_NAMES.map((brand) => (
+              <span
+                key={brand}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white border border-border/60 text-xs font-medium text-muted-foreground shadow-sm"
+              >
+                <Star className="w-3 h-3 text-primary/50" />
+                {brand}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -369,10 +418,167 @@ function ShippingStep() {
   );
 }
 
-/* ─── Step 3: Social Stats (Handles + Screenshot Uploads) ─── */
-function SocialStatsStep() {
+/* ─── Screenshot upload section for a platform ─── */
+function ScreenshotUploadSection({ screenshots, onAdd, onRemove }: {
+  screenshots: string[];
+  onAdd: () => void;
+  onRemove: (index: number) => void;
+}) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      {screenshots.length === 0 ? (
+        <div
+          className="border-2 border-dashed border-border rounded-lg px-4 py-6 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors"
+          onClick={onAdd}
+        >
+          <Image className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm font-medium">Upload screenshot</p>
+          <p className="text-xs text-muted-foreground mt-1">JPG, PNG — from your analytics</p>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            {screenshots.map((fileName, index) => (
+              <div key={index} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center shrink-0">
+                  <Image className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{fileName}</p>
+                  <p className="text-[11px] text-muted-foreground">Screenshot {index + 1}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onRemove(index)}
+                  className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={onAdd}
+            className="flex items-center gap-2 text-sm text-primary font-medium hover:text-primary/80 transition-colors w-full justify-center py-2 border border-dashed border-primary/30 rounded-lg hover:bg-primary/5"
+          >
+            <Plus className="w-4 h-4" />
+            Add another screenshot
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ─── "What to include" dialog for TikTok ─── */
+function TikTokHelpDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="text-[11px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full cursor-pointer hover:bg-primary/20 transition-colors inline-flex items-center gap-1"
+        >
+          <Info className="w-3 h-3" /> What to include
+        </button>
+      </DialogTrigger>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="text-base">How to screenshot your TikTok stats</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          {[
+            { step: '1', text: 'Open TikTok → tap the ☰ menu (top right) → TikTok Studio → Analytics' },
+            { step: '2', text: 'On the Overview tab, set the date range to "Last 28 days" or "Last 30 days"' },
+            { step: '3', text: 'Screenshot the overview showing Followers, Video Views, Profile Views, and Average Views' },
+            { step: '4', text: 'Then tap the Followers tab and screenshot your audience demographics (top countries, gender split, age ranges)' },
+          ].map((item) => (
+            <div key={item.step} className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">
+                {item.step}
+              </div>
+              <p className="text-sm text-muted-foreground pt-0.5">{item.text}</p>
+            </div>
+          ))}
+        </div>
+        <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg space-y-1.5">
+          <p className="font-medium text-foreground/70">Tips</p>
+          <ul className="list-disc pl-4 space-y-1">
+            <li>Use full-screen screenshots from the TikTok app (not third-party tools)</li>
+            <li>Screenshots should be taken within the last 7 days</li>
+            <li>Upload multiple screenshots if your stats span more than one screen</li>
+          </ul>
+        </div>
+        <DialogClose asChild>
+          <Button className="w-full mt-1">Got it</Button>
+        </DialogClose>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ─── "What to include" dialog for Instagram ─── */
+function InstagramHelpDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="text-[11px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full cursor-pointer hover:bg-primary/20 transition-colors inline-flex items-center gap-1"
+        >
+          <Info className="w-3 h-3" /> What to include
+        </button>
+      </DialogTrigger>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="text-base">How to screenshot your Instagram stats</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          {[
+            { step: '1', text: 'Open Instagram → tap your profile → tap "Professional dashboard" (or the Insights button)' },
+            { step: '2', text: 'Set the date range to "Last 30 days"' },
+            { step: '3', text: 'Screenshot the overview showing Accounts Reached, Accounts Engaged, and Total Followers' },
+            { step: '4', text: 'Then tap into your audience demographics and screenshot your top countries, gender split, and age ranges' },
+          ].map((item) => (
+            <div key={item.step} className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">
+                {item.step}
+              </div>
+              <p className="text-sm text-muted-foreground pt-0.5">{item.text}</p>
+            </div>
+          ))}
+        </div>
+        <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg space-y-1.5">
+          <p className="font-medium text-foreground/70">Tips</p>
+          <ul className="list-disc pl-4 space-y-1">
+            <li>You need a Professional or Creator account to access Insights</li>
+            <li>Use full-screen screenshots from the Instagram app (not third-party tools)</li>
+            <li>Screenshots should be taken within the last 7 days</li>
+            <li>Upload multiple screenshots if your stats span more than one screen</li>
+          </ul>
+        </div>
+        <DialogClose asChild>
+          <Button className="w-full mt-1">Got it</Button>
+        </DialogClose>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ─── Step 3: Social Stats (Handles + Multiple Screenshot Uploads) ─── */
+function SocialStatsStep() {
+  const [tiktokScreenshots, setTiktokScreenshots] = useState<string[]>([]);
+  const [igScreenshots, setIgScreenshots] = useState<string[]>([]);
+
+  function simulateAdd(setter: React.Dispatch<React.SetStateAction<string[]>>) {
+    // Simulate a file upload - in production this would open a file picker
+    const fakeNames = ['analytics_overview.png', 'stats_page.png', 'followers_detail.png', 'engagement.png'];
+    setter((prev) => [...prev, fakeNames[prev.length % fakeNames.length]]);
+  }
+
+  return (
+    <div className="space-y-5">
       {/* TikTok */}
       <Card>
         <CardHeader className="pb-3">
@@ -386,21 +592,19 @@ function SocialStatsStep() {
             <Label>TikTok Handle *</Label>
             <Input placeholder="@yourtiktokhandle" />
           </div>
-          <div className="space-y-1.5">
-            <Label className="flex items-center gap-1.5">
-              Stats Screenshot
-              <span className="text-[10px] font-normal text-primary bg-primary/10 px-1.5 py-0.5 rounded-full cursor-help" title="Upload a screenshot from your TikTok analytics showing your followers and average views">
-                <Info className="w-3 h-3 inline -mt-0.5" /> What to include
-              </span>
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              Stats Screenshots
+              <TikTokHelpDialog />
             </Label>
             <p className="text-xs text-muted-foreground">
-              Upload a screenshot of your TikTok analytics showing your <strong>followers</strong> and <strong>average views</strong>.
+              Upload screenshots of your TikTok analytics showing your <strong>followers</strong> and <strong>average views</strong>.
             </p>
-            <div className="border-2 border-dashed border-border rounded-lg px-4 py-5 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
-              <Image className="w-6 h-6 text-muted-foreground mx-auto mb-1.5" />
-              <p className="text-sm font-medium">Upload screenshot</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">JPG, PNG — from your TikTok analytics</p>
-            </div>
+            <ScreenshotUploadSection
+              screenshots={tiktokScreenshots}
+              onAdd={() => simulateAdd(setTiktokScreenshots)}
+              onRemove={(index) => setTiktokScreenshots((prev) => prev.filter((_, i) => i !== index))}
+            />
           </div>
         </CardContent>
       </Card>
@@ -418,25 +622,22 @@ function SocialStatsStep() {
             <Label>Instagram Handle *</Label>
             <Input placeholder="@yourinstagramhandle" />
           </div>
-          <div className="space-y-1.5">
-            <Label className="flex items-center gap-1.5">
-              Stats Screenshot
-              <span className="text-[10px] font-normal text-primary bg-primary/10 px-1.5 py-0.5 rounded-full cursor-help" title="Upload a screenshot from your Instagram insights showing your followers, views over 30 days, and reach over 30 days">
-                <Info className="w-3 h-3 inline -mt-0.5" /> What to include
-              </span>
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              Stats Screenshots
+              <InstagramHelpDialog />
             </Label>
             <p className="text-xs text-muted-foreground">
-              Upload a screenshot of your Instagram insights showing your <strong>followers</strong>, <strong>views over 30 days</strong>, and <strong>reach over 30 days</strong>.
+              Upload screenshots of your Instagram insights showing your <strong>followers</strong>, <strong>views over 30 days</strong>, and <strong>reach over 30 days</strong>.
             </p>
-            <div className="border-2 border-dashed border-border rounded-lg px-4 py-5 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
-              <Image className="w-6 h-6 text-muted-foreground mx-auto mb-1.5" />
-              <p className="text-sm font-medium">Upload screenshot</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">JPG, PNG — from your Instagram insights</p>
-            </div>
+            <ScreenshotUploadSection
+              screenshots={igScreenshots}
+              onAdd={() => simulateAdd(setIgScreenshots)}
+              onRemove={(index) => setIgScreenshots((prev) => prev.filter((_, i) => i !== index))}
+            />
           </div>
         </CardContent>
       </Card>
     </div>
   );
 }
-
