@@ -202,16 +202,16 @@ function WelcomeStep() {
     <div className="space-y-6 py-2">
       {/* Hero gradient section */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-purple-100 to-pink-50 px-6 py-8 text-center">
-        {/* Decorative background elements */}
+        {/* Decorative background elements — floating */}
         <div className="absolute top-0 left-0 w-full h-full opacity-[0.07] pointer-events-none">
-          <div className="absolute top-4 left-6 w-20 h-20 rounded-full bg-primary" />
-          <div className="absolute bottom-6 right-8 w-16 h-16 rounded-full bg-pink-400" />
-          <div className="absolute top-12 right-16 w-10 h-10 rounded-full bg-purple-400" />
+          <div className="absolute top-4 left-6 w-20 h-20 rounded-full bg-primary animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute bottom-6 right-8 w-16 h-16 rounded-full bg-pink-400 animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
+          <div className="absolute top-12 right-16 w-10 h-10 rounded-full bg-purple-400 animate-pulse" style={{ animationDuration: '3.5s', animationDelay: '0.5s' }} />
         </div>
 
         <div className="relative">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/80 shadow-sm mb-4">
-            <Sparkles className="w-8 h-8 text-primary" />
+            <Sparkles className="w-8 h-8 text-primary animate-pulse" style={{ animationDuration: '2.5s' }} />
           </div>
           <Badge variant="secondary" className="text-xs mb-3 gap-1 bg-white/80">
             <Crown className="w-3 h-3" />
@@ -232,7 +232,7 @@ function WelcomeStep() {
           { icon: Globe, text: 'Work with top beauty, lifestyle & wellness brands' },
           { icon: Sparkles, text: 'Free products or gift cards + compensation for every campaign' },
         ].map((item, i) => (
-          <div key={i} className="flex items-center gap-3">
+          <div key={i} className="flex items-center gap-3 animate-in fade-in-0 slide-in-from-left-3 duration-400" style={{ animationDelay: `${i * 100 + 200}ms`, animationFillMode: 'backwards' }}>
             <div className="icon-container w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
               <item.icon className="w-4.5 h-4.5 text-primary" />
             </div>
@@ -248,10 +248,11 @@ function WelcomeStep() {
         </p>
         <div className="relative overflow-hidden rounded-xl bg-muted/50 py-4">
           <div className="flex flex-wrap justify-center gap-2 px-4">
-            {BRAND_NAMES.map((brand) => (
+            {BRAND_NAMES.map((brand, i) => (
               <span
                 key={brand}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white border border-border/60 text-xs font-medium text-muted-foreground shadow-sm"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white border border-border/60 text-xs font-medium text-muted-foreground shadow-sm animate-in fade-in-0 zoom-in-95 duration-300 hover:scale-105 hover:shadow-md transition-all"
+                style={{ animationDelay: `${i * 40 + 400}ms`, animationFillMode: 'backwards' }}
               >
                 <Star className="w-3 h-3 text-primary/50" />
                 {brand}

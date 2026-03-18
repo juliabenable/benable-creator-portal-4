@@ -64,7 +64,7 @@ export default function DashboardPage() {
         <Card className="border-pink-200 bg-pink-50">
           <CardContent className="flex items-center gap-4 py-5">
             <div className="icon-container w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center shrink-0">
-              <Clock className="w-6 h-6 text-pink-600" />
+              <Clock className="w-6 h-6 text-pink-600 animate-pulse" style={{ animationDuration: '3s' }} />
             </div>
             <div>
               <h2 className="font-semibold text-pink-900">Application Under Review</h2>
@@ -80,7 +80,7 @@ export default function DashboardPage() {
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="flex items-center gap-4 py-5">
             <div className="icon-container w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Sparkles className="w-6 h-6 text-primary" />
+              <Sparkles className="w-6 h-6 text-primary animate-pulse" style={{ animationDuration: '2.5s' }} />
             </div>
             <div>
               <h2 className="font-semibold">
@@ -102,7 +102,7 @@ export default function DashboardPage() {
             {interestCampaigns.map((campaign) => (
               <Card
                 key={campaign.id}
-                className="cursor-pointer border-purple-200 bg-purple-50/50 hover:shadow-md transition-shadow active:scale-[0.99]"
+                className="group cursor-pointer border-purple-200 bg-purple-50/50 hover:shadow-md transition-shadow active:scale-[0.99]"
                 onClick={() => navigate(`/campaign/${campaign.id}`)}
               >
                 <CardContent className="py-4">
@@ -125,7 +125,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-purple-400 shrink-0 mt-2" />
+                    <ArrowRight className="w-5 h-5 text-purple-400 shrink-0 mt-2 group-hover:translate-x-1 transition-transform duration-200" />
                   </div>
                 </CardContent>
               </Card>
@@ -142,7 +142,11 @@ export default function DashboardPage() {
             <div className="space-y-5">
               <Card className="border-primary/20">
                 <CardContent className="py-6 text-center">
-                  <PartyPopper className="welcome-icon w-12 h-12 text-primary mx-auto mb-3" />
+                  <div className="relative mx-auto w-12 h-12 mb-3">
+                    <PartyPopper className="welcome-icon w-12 h-12 text-primary mx-auto animate-bounce" style={{ animationDuration: '2.5s' }} />
+                    <div className="absolute -top-1 -left-1 w-2 h-2 bg-yellow-400 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
+                    <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-pink-400 rounded-full animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }} />
+                  </div>
                   <h3 className="font-bold text-lg">You're In!</h3>
                   <p className="text-sm text-muted-foreground mt-1">
                     Your profile is being matched with brands. You'll receive your first campaign
@@ -173,7 +177,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground py-2">
-                <Bell className="w-4 h-4" />
+                <Bell className="w-4 h-4 animate-bounce" style={{ animationDuration: '3s' }} />
                 <p>We'll notify you when a campaign is ready</p>
               </div>
             </div>
@@ -237,7 +241,7 @@ export default function DashboardPage() {
         <div className="space-y-5">
           <Card className="border-muted">
             <CardContent className="py-6 text-center">
-              <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+              <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-3 animate-pulse" style={{ animationDuration: '3s' }} />
               <h3 className="font-bold text-lg">Thanks for Applying!</h3>
               <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
                 We're growing quickly and spots in our creator program are limited right now.

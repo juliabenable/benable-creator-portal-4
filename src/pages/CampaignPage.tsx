@@ -790,7 +790,11 @@ function OrderPlacedStep({ campaign }: StepProps) {
     <div className="space-y-4">
       <Card>
         <CardContent className="py-6 text-center space-y-2">
-          <Package className="w-12 h-12 text-muted-foreground mx-auto mb-1" />
+          <div className="relative mx-auto w-12 h-12 mb-1">
+            <Package className="w-12 h-12 text-primary mx-auto animate-bounce" style={{ animationDuration: '2s' }} />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-success rounded-full animate-ping" style={{ animationDuration: '2s' }} />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-success rounded-full" />
+          </div>
           <p className="font-semibold text-lg">Product is on its way</p>
           <p className="text-sm text-muted-foreground">
             Your order has been placed. Please let us know as soon as you receive it.
@@ -1345,14 +1349,14 @@ function ContentApprovedStep({ campaign }: StepProps) {
       {/* Content Approved + Post ASAP — single polished card */}
       <Card className="overflow-hidden border-0 shadow-md">
         {/* Approved banner */}
-        <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-3 flex items-center gap-2.5">
-          <CheckCircle2 className="w-5 h-5 text-white" />
+        <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-3 flex items-center gap-2.5 animate-in fade-in-0 slide-in-from-top-2 duration-500">
+          <CheckCircle2 className="w-5 h-5 text-white animate-spin" style={{ animationDuration: '0.5s', animationIterationCount: '1', animationFillMode: 'forwards' }} />
           <h3 className="font-bold text-white text-base">Content Approved</h3>
         </div>
         <CardContent className="py-5 space-y-3">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Rocket className="w-5 h-5 text-primary" />
+              <Rocket className="w-5 h-5 text-primary animate-bounce" style={{ animationDuration: '2s' }} />
             </div>
             <div>
               <h4 className="font-semibold text-base">Time to post!</h4>
@@ -1489,7 +1493,12 @@ function CompletedStep({ campaign: _campaign }: StepProps) {
       {/* Main congratulations message */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
         <CardContent className="py-8 text-center space-y-4">
-          <PartyPopper className="w-14 h-14 text-primary mx-auto" />
+          <div className="relative mx-auto w-14 h-14">
+            <PartyPopper className="w-14 h-14 text-primary mx-auto animate-bounce" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }} />
+            <div className="absolute -top-1 -left-1 w-2 h-2 bg-yellow-400 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
+            <div className="absolute -bottom-1 -right-2 w-2 h-2 bg-pink-400 rounded-full animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }} />
+            <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-primary rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '1s' }} />
+          </div>
           <div>
             <h3 className="font-bold text-xl">Congrats, you did it!</h3>
             <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
